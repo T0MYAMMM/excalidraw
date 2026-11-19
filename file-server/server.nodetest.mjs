@@ -134,3 +134,43 @@ test("delete moves the drawing to .trash", async () => {
 test("path traversal in the URL is rejected", async () => {
   assert.equal((await api("/..%2Fsecret")).status, 400);
 });
+
+test("reads and writes return the content version", async () => {
+  const created = await (await post({ name: "v" })).json();
+  const res = await api("/v");
+  assert.equal(res.headers.get("etag"), `"${created.version}"`);
+  const updated = await (
+    await api("/v", { method: "PUT", body: scene("1") })
+  ).json();
+  assert.notEqual(updated.version, created.version);
+  assert.equal((await api("/v")).headers.get("etag"), `"${updated.version}"`);
+});
+
+test("If-Match refuses a write based on an old version", async () => {
+  const { version: v1 } = await (await post({ name: "c" })).json();
+  const put = (body, version) =>
+    api("/c", { method: "PUT", headers: { "If-Match": `"${version}"` }, body });
+  const ok = await put(scene("browser"), v1);
+  assert.equal(ok.status, 200);
+  const { version: v2 } = await ok.json();
+
+  const stale = await put(scene("agent"), v1);
+  assert.equal(stale.status, 412);
+  assert.equal((await stale.json()).version, v2);
+  assert.deepEqual((await (await api("/c")).json()).elements, [
+    { id: "browser" },
+  ]);
+});
+
+test("If-None-Match answers 304 when unchanged", async () => {
+  const { version } = await (await post({ name: "n" })).json();
+  const same = await api("/n", {
+    headers: { "If-None-Match": `"${version}"` },
+  });
+  assert.equal(same.status, 304);
+  await api("/n", { method: "PUT", body: scene("x") });
+  const changed = await api("/n", {
+    headers: { "If-None-Match": `"${version}"` },
+  });
+  assert.equal(changed.status, 200);
+});

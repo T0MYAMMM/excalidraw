@@ -8,8 +8,14 @@
  * Routes (all JSON unless noted):
  *   GET    /api/files                  -> [{ name, size, updatedAt }]
  *   POST   /api/files                  { name, content? } -> 201 { name, ... }
- *   GET    /api/files/:name            -> scene JSON (raw)
- *   PUT    /api/files/:name            scene JSON -> { name, size, updatedAt }
+ *   GET    /api/files/:name            -> scene JSON (raw), ETag: "<version>"
+ *   PUT    /api/files/:name            scene JSON -> { name, size, updatedAt, version }
+ *
+ * Versions: every read/write returns the content's version (a hash). A PUT
+ * with `If-Match: "<version>"` is refused with 412 { error, version } when
+ * the file changed since that version, so two writers (the browser and an
+ * AI agent) can't silently overwrite each other. A GET with
+ * `If-None-Match: "<version>"` answers 304 when nothing changed.
  *   PATCH  /api/files/:name            { newName } -> { name, ... }
  *   DELETE /api/files/:name            -> 204 (moved to .trash)
  *
@@ -25,7 +31,7 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { join } from "node:path";
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 const EXTENSION = ".excalidraw";
 const MAX_BODY_BYTES = 50 * 1024 * 1024;
@@ -47,11 +53,20 @@ export const emptyScene = () =>
   );
 
 class HttpError extends Error {
-  constructor(status, message) {
+  constructor(status, message, extra = {}) {
     super(message);
     this.status = status;
+    this.extra = extra;
   }
 }
+
+/** Short content hash used as the drawing's version / ETag. */
+export const versionOf = (text) =>
+  createHash("sha256").update(text).digest("hex").slice(0, 20);
+
+/** `"abc"` or `W/"abc"` -> `abc`; null when the header is missing. */
+const parseETag = (header) =>
+  header ? header.replace(/^W\//, "").replace(/"/g, "").trim() : null;
 
 /**
  * Returns the trimmed name if it is safe to use as a file name, else throws.
@@ -152,6 +167,14 @@ export const createHandler = (dataDir) => {
     return { name, size: s.size, updatedAt: s.mtime.toISOString() };
   };
 
+  // one write at a time, so a version check and its write can't interleave
+  let writeQueue = Promise.resolve();
+  const serialized = (fn) => {
+    const run = writeQueue.then(fn, fn);
+    writeQueue = run.catch(() => undefined);
+    return run;
+  };
+
   const requireFile = async (name) => {
     if (!(await exists(pathFor(name)))) {
       throw new HttpError(404, "drawing not found");
@@ -177,15 +200,26 @@ export const createHandler = (dataDir) => {
       throw new HttpError(409, "a drawing with that name already exists");
     }
     await writeAtomic(pathFor(name), content);
-    return info(name);
+    return { ...(await info(name)), version: versionOf(content) };
   };
 
   const update = async (req, name) => {
-    await requireFile(name);
     const content = await readBody(req);
     validateScene(content);
-    await writeAtomic(pathFor(name), content);
-    return info(name);
+    const expected = parseETag(req.headers["if-match"]);
+    return serialized(async () => {
+      await requireFile(name);
+      if (expected) {
+        const current = versionOf(await readFile(pathFor(name), "utf8"));
+        if (current !== expected) {
+          throw new HttpError(412, "drawing changed since it was read", {
+            version: current,
+          });
+        }
+      }
+      await writeAtomic(pathFor(name), content);
+      return { ...(await info(name)), version: versionOf(content) };
+    });
   };
 
   const renameFile = async (req, name) => {
@@ -219,26 +253,35 @@ export const createHandler = (dataDir) => {
         return send(res, 200, await list());
       }
       if (!name && req.method === "POST") {
-        return send(res, 201, await create(req));
+        return send(res, 201, await serialized(() => create(req)));
       }
       if (name && req.method === "GET") {
         await requireFile(name);
-        return send(res, 200, await readFile(pathFor(name), "utf8"));
+        const content = await readFile(pathFor(name), "utf8");
+        const version = versionOf(content);
+        const etag = { ETag: `"${version}"` };
+        if (parseETag(req.headers["if-none-match"]) === version) {
+          return send(res, 304, undefined, etag);
+        }
+        return send(res, 200, content, etag);
       }
       if (name && req.method === "PUT") {
         return send(res, 200, await update(req, name));
       }
       if (name && req.method === "PATCH") {
-        return send(res, 200, await renameFile(req, name));
+        return send(res, 200, await serialized(() => renameFile(req, name)));
       }
       if (name && req.method === "DELETE") {
-        await trash(name);
+        await serialized(() => trash(name));
         return send(res, 204);
       }
       throw new HttpError(405, "method not allowed");
     } catch (error) {
       if (error instanceof HttpError) {
-        return send(res, error.status, { error: error.message });
+        return send(res, error.status, {
+          error: error.message,
+          ...error.extra,
+        });
       }
       console.error(error);
       return send(res, 500, { error: "internal error" });

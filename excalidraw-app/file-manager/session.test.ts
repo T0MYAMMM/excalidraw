@@ -8,24 +8,29 @@ import { appJotaiStore } from "../app-jotai";
 import * as api from "./api";
 import { currentDrawingAtom, drawingSession, saveStatusAtom } from "./session";
 
-vi.mock("./api", () => ({
+vi.mock("./api", async () => ({
+  FileApiError: (await vi.importActual<typeof import("./api")>("./api"))
+    .FileApiError,
   listDrawings: vi.fn(async () => []),
   readDrawing: vi.fn(),
-  createDrawing: vi.fn(async (name: string) => ({ name })),
-  writeDrawing: vi.fn(async (name: string) => ({ name })),
+  readDrawingIfChanged: vi.fn(async () => null),
+  createDrawing: vi.fn(async (name: string) => ({ name, version: "c1" })),
+  writeDrawing: vi.fn(async (name: string) => ({ name, version: "w1" })),
   renameDrawing: vi.fn(async (_: string, newName: string) => ({
     name: newName,
   })),
   deleteDrawing: vi.fn(async () => undefined),
 }));
 
-const emptyFile = JSON.stringify({
-  type: "excalidraw",
-  version: 2,
-  elements: [],
-  appState: {},
-  files: {},
-});
+const fileWith = (elements: any[]) =>
+  JSON.stringify({
+    type: "excalidraw",
+    version: 2,
+    elements,
+    appState: {},
+    files: {},
+  });
+const emptyFile = { content: fileWith([]), version: "v1" };
 
 /** Minimal stand-in for the editor: a mutable scene plus spies. */
 const createFakeEditor = () => {
@@ -39,6 +44,7 @@ const createFakeEditor = () => {
     getAppState: () => state.appState,
     getFiles: () => ({}),
     addFiles: vi.fn(),
+    setToast: vi.fn(),
     updateScene: vi.fn((scene: any) => {
       if (scene.elements) {
         state.elements = scene.elements;
@@ -80,6 +86,10 @@ describe("drawingSession", () => {
     await drawingSession.start(asAPI(editor));
   });
 
+  afterEach(() => {
+    drawingSession.stop();
+  });
+
   it("does nothing on change when no drawing is open", async () => {
     editor.state.elements = [rect("a")];
     drawingSession.onSceneChange();
@@ -106,6 +116,8 @@ describe("drawingSession", () => {
     await drawingSession.save();
     expect(api.writeDrawing).toHaveBeenCalledTimes(1);
     expect(vi.mocked(api.writeDrawing).mock.calls[0][0]).toBe("Plan");
+    // the save names the version it was based on
+    expect(vi.mocked(api.writeDrawing).mock.calls[0][2]).toBe("v1");
     expect(
       JSON.parse(vi.mocked(api.writeDrawing).mock.calls[0][1]).elements,
     ).toHaveLength(1);
@@ -163,6 +175,90 @@ describe("drawingSession", () => {
     await drawingSession.remove("Plan");
     expect(api.deleteDrawing).toHaveBeenCalledWith("Plan");
     expect(editor.resetScene).toHaveBeenCalled();
+    expect(appJotaiStore.get(currentDrawingAtom)).toBeNull();
+  });
+
+  it("reloads the open drawing when it changed on disk", async () => {
+    vi.mocked(api.readDrawing).mockResolvedValue(emptyFile);
+    await drawingSession.open("Plan");
+    vi.mocked(api.readDrawingIfChanged).mockResolvedValueOnce({
+      content: fileWith([rect("from-agent")]),
+      version: "v2",
+    });
+    await drawingSession.checkForChanges();
+    expect(api.readDrawingIfChanged).toHaveBeenCalledWith("Plan", "v1");
+    expect(editor.state.elements.map((e) => e.id)).toEqual(["from-agent"]);
+    // a reload keeps the user's view (open fits only non-empty drawings)
+    expect(editor.setViewport).not.toHaveBeenCalled();
+
+    // the next save is based on the reloaded version
+    editor.state.elements = [...editor.state.elements, rect("mine")];
+    await drawingSession.save();
+    expect(vi.mocked(api.writeDrawing).mock.calls[0][2]).toBe("v2");
+  });
+
+  it("doesn't reload over unsaved local edits", async () => {
+    vi.mocked(api.readDrawing).mockResolvedValue(emptyFile);
+    await drawingSession.open("Plan");
+    editor.state.elements = [rect("mine")];
+    vi.mocked(api.readDrawingIfChanged).mockResolvedValueOnce({
+      content: fileWith([rect("from-agent")]),
+      version: "v2",
+    });
+    await drawingSession.checkForChanges();
+    expect(editor.state.elements.map((e) => e.id)).toEqual(["mine"]);
+  });
+
+  it("keeps local edits as a conflict copy when the disk changed", async () => {
+    vi.mocked(api.readDrawing).mockResolvedValue(emptyFile);
+    await drawingSession.open("Plan");
+    editor.state.elements = [rect("mine")];
+
+    vi.mocked(api.writeDrawing).mockRejectedValueOnce(
+      new api.FileApiError(412, "changed", "v2"),
+    );
+    vi.mocked(api.readDrawing).mockResolvedValueOnce({
+      content: fileWith([rect("from-agent")]),
+      version: "v2",
+    });
+    await drawingSession.save();
+
+    const [copyName, copyContent] = vi.mocked(api.createDrawing).mock.calls[0];
+    expect(copyName).toMatch(/^Plan \(conflict .+\)$/);
+    expect(JSON.parse(copyContent!).elements.map((e: any) => e.id)).toEqual([
+      "mine",
+    ]);
+    // the canvas now shows the disk version, still as "Plan"
+    expect(editor.state.elements.map((e) => e.id)).toEqual(["from-agent"]);
+    expect(appJotaiStore.get(currentDrawingAtom)).toBe("Plan");
+    expect(editor.setToast).toHaveBeenCalled();
+  });
+
+  it("retries instead of copying when the disk holds what we last saved", async () => {
+    vi.mocked(api.readDrawing).mockResolvedValue(emptyFile);
+    await drawingSession.open("Plan");
+    editor.state.elements = [rect("mine")];
+    vi.mocked(api.writeDrawing).mockRejectedValueOnce(
+      new api.FileApiError(412, "changed", "v9"),
+    );
+    // same content, different version (e.g. re-saved by another tab)
+    vi.mocked(api.readDrawing).mockResolvedValueOnce({
+      content: (drawingSession as any).lastSaved,
+      version: "v9",
+    });
+    await drawingSession.save();
+    expect(api.createDrawing).not.toHaveBeenCalled();
+    expect(api.writeDrawing).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(api.writeDrawing).mock.calls[1][2]).toBe("v9");
+  });
+
+  it("stops autosaving when the open drawing disappears from disk", async () => {
+    vi.mocked(api.readDrawing).mockResolvedValue(emptyFile);
+    await drawingSession.open("Plan");
+    vi.mocked(api.readDrawingIfChanged).mockRejectedValueOnce(
+      new api.FileApiError(404, "drawing not found"),
+    );
+    await drawingSession.checkForChanges();
     expect(appJotaiStore.get(currentDrawingAtom)).toBeNull();
   });
 });

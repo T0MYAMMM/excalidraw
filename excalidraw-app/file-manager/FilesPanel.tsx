@@ -32,6 +32,8 @@ const STATUS_LABEL: Record<SaveStatus, string> = {
   error: "Not saved: server unreachable",
 };
 
+const LIST_REFRESH_MS = 5000;
+
 const UNFILED_WARNING =
   "The current drawing isn't saved to a file and will be replaced. Continue?";
 
@@ -57,9 +59,12 @@ export const FilesPanel = () => {
         })
         .catch(() => !cancelled && setLoadError(true));
     refresh();
+    // also picks up drawings created outside the app (e.g. by the MCP server)
+    const interval = setInterval(refresh, LIST_REFRESH_MS);
     window.addEventListener("focus", refresh);
     return () => {
       cancelled = true;
+      clearInterval(interval);
       window.removeEventListener("focus", refresh);
     };
   }, [version]);

@@ -1,0 +1,17 @@
+{
+  "name": "excalidraw-files-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MCP server for the drawings stored by the Excalidraw file manager",
+  "type": "module",
+  "bin": { "excalidraw-files-mcp": "index.mjs" },
+  "scripts": {
+    "start": "node index.mjs",
+    "test": "node --test *.nodetest.mjs"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.25.2",
+    "zod": "4.3.6"
+  }
+}
