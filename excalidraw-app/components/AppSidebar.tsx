@@ -1,12 +1,17 @@
 import { DefaultSidebar, Sidebar, THEME } from "@excalidraw/excalidraw";
 import {
+  LoadIcon,
   messageCircleIcon,
   presentationIcon,
 } from "@excalidraw/excalidraw/components/icons";
 import { LinkButton } from "@excalidraw/excalidraw/components/LinkButton";
 import { useUIAppState } from "@excalidraw/excalidraw/context/ui-appState";
 
+import { FilesPanel } from "../file-manager/FilesPanel";
+
 import "./AppSidebar.scss";
+
+export const FILES_SIDEBAR_TAB = "files";
 
 type SidebarPromoCopyProps = {
   text: string;
@@ -72,6 +77,13 @@ export const AppSidebar = () => {
     <DefaultSidebar>
       <DefaultSidebar.TabTriggers>
         <Sidebar.TabTrigger
+          tab={FILES_SIDEBAR_TAB}
+          title="Files"
+          style={{ opacity: openSidebar?.tab === FILES_SIDEBAR_TAB ? 1 : 0.4 }}
+        >
+          {LoadIcon}
+        </Sidebar.TabTrigger>
+        <Sidebar.TabTrigger
           tab="comments"
           style={{ opacity: openSidebar?.tab === "comments" ? 1 : 0.4 }}
         >
@@ -84,6 +96,9 @@ export const AppSidebar = () => {
           {presentationIcon}
         </Sidebar.TabTrigger>
       </DefaultSidebar.TabTriggers>
+      <Sidebar.Tab tab={FILES_SIDEBAR_TAB}>
+        <FilesPanel />
+      </Sidebar.Tab>
       <Sidebar.Tab tab="comments">
         <div className="app-sidebar-promo-container">
           <div

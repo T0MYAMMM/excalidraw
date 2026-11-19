@@ -21,6 +21,7 @@ import { ShareableLinkDialog } from "@excalidraw/excalidraw/components/Shareable
 import Trans from "@excalidraw/excalidraw/components/Trans";
 import {
   APP_NAME,
+  DEFAULT_SIDEBAR,
   EVENT,
   VERSION_TIMEOUT,
   debounce,
@@ -147,7 +148,8 @@ import { ExcalidrawPlusIframeExport } from "./ExcalidrawPlusIframeExport";
 import "./index.scss";
 
 import { ExcalidrawPlusPromoBanner } from "./components/ExcalidrawPlusPromoBanner";
-import { AppSidebar } from "./components/AppSidebar";
+import { AppSidebar, FILES_SIDEBAR_TAB } from "./components/AppSidebar";
+import { drawingSession } from "./file-manager/session";
 
 import type { CollabAPI } from "./collab/Collab";
 
@@ -611,6 +613,7 @@ const ExcalidrawWrapper = () => {
             ...localDataState,
             captureUpdate: CaptureUpdateAction.NEVER,
           });
+          drawingSession.onTabSync();
           LibraryIndexedDBAdapter.load().then((data) => {
             if (data) {
               excalidrawAPI.updateLibrary({
@@ -660,6 +663,7 @@ const ExcalidrawWrapper = () => {
     const visibilityChange = (event: FocusEvent | Event) => {
       if (event.type === EVENT.BLUR || document.hidden) {
         LocalData.flushSave();
+        drawingSession.save();
       }
       if (
         event.type === EVENT.VISIBILITY_CHANGE ||
@@ -691,6 +695,12 @@ const ExcalidrawWrapper = () => {
     const unloadHandler = (event: BeforeUnloadEvent) => {
       LocalData.flushSave();
 
+      if (drawingSession.hasUnsavedChanges()) {
+        drawingSession.save();
+        preventUnload(event);
+        return;
+      }
+
       if (
         excalidrawAPI &&
         LocalData.fileStorage.shouldPreventUnload(
@@ -719,6 +729,8 @@ const ExcalidrawWrapper = () => {
   ) => {
     if (collabAPI?.isCollaborating()) {
       collabAPI.syncElements(elements);
+    } else {
+      drawingSession.onSceneChange();
     }
 
     // this check is redundant, but since this is a hot path, it's best
@@ -957,6 +969,7 @@ const ExcalidrawWrapper = () => {
         viewportStatusFrame={viewportStatusFrame}
         userToFollow={userToFollow}
         onChange={onChange}
+        onInitialize={(api) => drawingSession.start(api)}
         onExport={onExport}
         initialData={initialStatePromiseRef.current.promise}
         isCollaborating={isCollaborating}
@@ -1041,6 +1054,13 @@ const ExcalidrawWrapper = () => {
           isCollabEnabled={isCollabAvailable}
           theme={appTheme}
           refresh={() => forceRefresh((prev) => !prev)}
+          onFilesOpen={() =>
+            excalidrawAPI?.toggleSidebar({
+              name: DEFAULT_SIDEBAR.name,
+              tab: FILES_SIDEBAR_TAB,
+              force: true,
+            })
+          }
         />
         <AppWelcomeScreen
           onCollabDialogOpen={onCollabDialogOpen}
