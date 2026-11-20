@@ -150,6 +150,7 @@ import "./index.scss";
 import { ExcalidrawPlusPromoBanner } from "./components/ExcalidrawPlusPromoBanner";
 import { AppSidebar, FILES_SIDEBAR_TAB } from "./components/AppSidebar";
 import { drawingSession } from "./file-manager/session";
+import { removeImageBackground } from "./background-removal";
 
 import type { CollabAPI } from "./collab/Collab";
 
@@ -722,6 +723,12 @@ const ExcalidrawWrapper = () => {
     };
   }, [excalidrawAPI]);
 
+  // stable reference: the editor re-renders when its props change
+  const onRemoveImageBackground = useCallback(
+    (image: Blob) => removeImageBackground(image, excalidrawAPI),
+    [excalidrawAPI],
+  );
+
   const onChange = (
     elements: readonly OrderedExcalidrawElement[],
     appState: AppState,
@@ -970,6 +977,7 @@ const ExcalidrawWrapper = () => {
         userToFollow={userToFollow}
         onChange={onChange}
         onInitialize={(api) => drawingSession.start(api)}
+        onRemoveImageBackground={onRemoveImageBackground}
         onExport={onExport}
         initialData={initialStatePromiseRef.current.promise}
         isCollaborating={isCollaborating}

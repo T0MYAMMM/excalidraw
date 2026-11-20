@@ -907,6 +907,12 @@ export interface ExcalidrawProps {
    * Invoked once the initial scene is loaded.
    */
   onInitialize?: (api: ExcalidrawImperativeAPI) => void;
+  /**
+   * Returns a copy of the image (PNG) with its background removed. When
+   * set, "Remove background" appears in the context menu of a selected
+   * image. Throw to cancel; showing progress and errors is up to the host.
+   */
+  onRemoveImageBackground?: (image: Blob) => Promise<Blob>;
   isCollaborating?: boolean;
   onPointerUpdate?: (payload: {
     pointer: { x: number; y: number; tool: "pointer" | "laser" };

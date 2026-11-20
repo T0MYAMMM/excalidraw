@@ -140,6 +140,7 @@ export type ActionName =
   | "copyElementLink"
   | "linkToElement"
   | "cropEditor"
+  | "removeImageBackground"
   | "wrapSelectionInFrame"
   | "toggleWrap"
   | "toggleShapeSwitch"

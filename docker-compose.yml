@@ -18,6 +18,7 @@ services:
       - ./file-server/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - file-server
+      - rembg
 
   # Stores drawings as <name>.excalidraw files in DRAWINGS_DIR (default ~/drawings).
   # Create the folder before the first start so it is owned by you, not root.
@@ -34,3 +35,20 @@ services:
     volumes:
       - ./file-server:/app:ro
       - ${DRAWINGS_DIR:-~/drawings}:/data
+
+  # Background removal for images (context menu > Remove background).
+  # Local models only; they download once into the rembg-models volume.
+  rembg:
+    image: danielgatis/rembg:2.0.86
+    container_name: excalidraw-rembg
+    restart: unless-stopped
+    command: ["s", "--host", "0.0.0.0", "--port", "7000", "--no-ui"]
+    environment:
+      - U2NET_HOME=/models
+    volumes:
+      - rembg-models:/models
+    # one image peaks under 2 GB; the cap keeps a huge image from starving WSL
+    mem_limit: 3g
+
+volumes:
+  rembg-models:

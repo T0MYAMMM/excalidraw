@@ -79,6 +79,7 @@ const ExcalidrawBase = (props: ExcalidrawProps) => {
     onMount,
     onUnmount,
     onInitialize,
+    onRemoveImageBackground,
     isCollaborating = false,
     onPointerUpdate,
     renderTopLeftUI,
@@ -222,6 +223,7 @@ const ExcalidrawBase = (props: ExcalidrawProps) => {
           onMount={onMount}
           onUnmount={onUnmount}
           onInitialize={onInitialize}
+          onRemoveImageBackground={onRemoveImageBackground}
           isCollaborating={isCollaborating}
           onPointerUpdate={onPointerUpdate}
           renderTopLeftUI={renderTopLeftUI}

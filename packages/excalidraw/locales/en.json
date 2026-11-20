@@ -134,6 +134,7 @@
     "distributeVertically": "Distribute vertically",
     "flipHorizontal": "Flip horizontal",
     "flipVertical": "Flip vertical",
+    "removeImageBackground": "Remove background",
     "viewMode": "View mode",
     "share": "Share",
     "showStroke": "Show stroke color picker",
