@@ -155,12 +155,40 @@ const link = (scene) => {
   }
   const href = (title) => `${BASE_URL}?element=${sectionBox.get(title).id}`;
 
-  // drop chips from a previous run
+  // drop chips from a previous run. Ids can change when the browser saves,
+  // so chips are recognised by what they are: a "↗ …" box linking to a
+  // service section, the "Services:" label, and their bound labels; plus any
+  // "↗ …" text whose box is gone (left over from older runs).
+  const isChipBox = (e) =>
+    e.type === "rectangle" &&
+    e.backgroundColor.toLowerCase() === "#f3f0ff" &&
+    (e.link ?? "").includes("?element=") &&
+    (e.boundElements ?? []).some((b) => byId.get(b.id)?.text?.startsWith("↗"));
+  const doomed = new Set();
   for (const e of live) {
-    if (e.id.startsWith("svc-chip-")) {
-      e.isDeleted = true;
-      touch(e);
+    if (
+      e.id.startsWith("svc-chip-") ||
+      isChipBox(e) ||
+      (e.type === "text" && e.text === "Services:")
+    ) {
+      doomed.add(e.id);
     }
+    if (
+      e.type === "text" &&
+      e.text.startsWith("↗") &&
+      (!e.containerId || !byId.has(e.containerId))
+    ) {
+      doomed.add(e.id); // orphaned chip label
+    }
+  }
+  for (const e of live) {
+    if (e.containerId && doomed.has(e.containerId)) {
+      doomed.add(e.id); // a chip's own label
+    }
+  }
+  for (const id of doomed) {
+    byId.get(id).isDeleted = true;
+    touch(byId.get(id));
   }
 
   const mats = live
@@ -176,7 +204,7 @@ const link = (scene) => {
   mats.forEach((box, row) => {
     const g = box.groupIds.at(-1);
     const els = members(g).filter(
-      (e) => !e.id.startsWith("svc-chip-") && !e.id.startsWith("mat-title-"),
+      (e) => !e.isDeleted && !e.id.startsWith("mat-title-"), // skips chips being replaced
     );
     if (els.some((e) => e.type === "text" && e.text.trim() === "- Template")) {
       return; // not finished yet
