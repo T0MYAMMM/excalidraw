@@ -1,0 +1,416 @@
+[
+ {
+  "type": "rectangle",
+  "id": "kds-box",
+  "x": 5575,
+  "y": -10269,
+  "width": 660,
+  "height": 589,
+  "backgroundColor": "#f3f0ff",
+  "strokeWidth": 4,
+  "roughness": 0
+ },
+ {
+  "type": "text",
+  "id": "kds-title",
+  "x": 5594,
+  "y": -10250,
+  "width": 308,
+  "height": 20,
+  "text": "- Amazon Kinesis Data Streams (KDS)",
+  "fontSize": 16
+ },
+ {
+  "type": "text",
+  "id": "kds-desc",
+  "x": 5609,
+  "y": -10220,
+  "width": 369,
+  "height": 41,
+  "text": "Real-time streaming: producers write records into a stream of\nshards, many consumers read them in order, and records stay\n24 h (up to 365 days) so they can be replayed.",
+  "fontSize": 11
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-p",
+  "x": 5955,
+  "y": -10220,
+  "width": 62,
+  "height": 31,
+  "backgroundColor": "#e6fcf5",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "Producers",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-s",
+  "x": 6045,
+  "y": -10220,
+  "width": 62,
+  "height": 31,
+  "backgroundColor": "#96f2d7",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "Stream\n(shards)",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-c",
+  "x": 6135,
+  "y": -10220,
+  "width": 62,
+  "height": 31,
+  "backgroundColor": "#e6fcf5",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "Consumers",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "kds-a1",
+  "start": {
+   "id": "kds-p"
+  },
+  "end": {
+   "id": "kds-s"
+  },
+  "strokeWidth": 1,
+  "roughness": 0
+ },
+ {
+  "type": "arrow",
+  "id": "kds-a2",
+  "start": {
+   "id": "kds-s"
+  },
+  "end": {
+   "id": "kds-c"
+  },
+  "strokeWidth": 1,
+  "roughness": 0
+ },
+ {
+  "type": "text",
+  "id": "kds-feat",
+  "x": 5594,
+  "y": -10160,
+  "width": 132,
+  "height": 20,
+  "text": "- Main Features",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-f1",
+  "x": 5609,
+  "y": -10130,
+  "width": 135,
+  "height": 31,
+  "backgroundColor": "#38d9a9",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "1. Shards & Capacity",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "text",
+  "id": "kds-f1t",
+  "x": 5754,
+  "y": -10132,
+  "width": 351,
+  "height": 22,
+  "text": "Each shard takes 1 MB/s or 1,000 records/s in and serves 2 MB/s out.\nOn-demand mode adds shards for you; provisioned mode you size yourself.",
+  "fontSize": 9
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-f2",
+  "x": 5609,
+  "y": -10085,
+  "width": 135,
+  "height": 31,
+  "backgroundColor": "#96f2d7",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "2. Partition Key & Ordering",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "text",
+  "id": "kds-f2t",
+  "x": 5754,
+  "y": -10087,
+  "width": 351,
+  "height": 22,
+  "text": "The partition key picks the shard. Order is kept only within one shard.\nOne hot key = one hot shard (ProvisionedThroughputExceeded).",
+  "fontSize": 9
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-f3",
+  "x": 5609,
+  "y": -10040,
+  "width": 135,
+  "height": 31,
+  "backgroundColor": "#38d9a9",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "3. Consumers & Fan-out",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "text",
+  "id": "kds-f3t",
+  "x": 5754,
+  "y": -10042,
+  "width": 327,
+  "height": 22,
+  "text": "Shared mode: all consumers split 2 MB/s per shard (pull, ~200 ms).\nEnhanced fan-out: 2 MB/s per consumer per shard, pushed (~70 ms).",
+  "fontSize": 9
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-f4",
+  "x": 5609,
+  "y": -9995,
+  "width": 135,
+  "height": 31,
+  "backgroundColor": "#96f2d7",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "4. Retention & Replay",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "text",
+  "id": "kds-f4t",
+  "x": 5754,
+  "y": -9997,
+  "width": 332,
+  "height": 22,
+  "text": "Default 24 h, up to 365 days. Consumers can re-read from a sequence\nnumber or timestamp to reprocess after a bug or to backfill.",
+  "fontSize": 9
+ },
+ {
+  "type": "text",
+  "id": "kds-ill",
+  "x": 5594,
+  "y": -9945,
+  "width": 123,
+  "height": 20,
+  "text": "- Illustration",
+  "fontSize": 16
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-prod",
+  "x": 5609,
+  "y": -9888,
+  "width": 95,
+  "height": 62,
+  "backgroundColor": "#e6fcf5",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "Producers\n(apps, IoT, logs,\nSDK / KPL / agent)",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-stream",
+  "x": 5770,
+  "y": -9915,
+  "width": 170,
+  "height": 118,
+  "backgroundColor": "#e6fcf5",
+  "strokeWidth": 1,
+  "roughness": 0
+ },
+ {
+  "type": "text",
+  "id": "kds-stream-t",
+  "x": 5778,
+  "y": -9910,
+  "width": 94,
+  "height": 11,
+  "text": "Kinesis Data Stream",
+  "fontSize": 9
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-sh1",
+  "x": 5782,
+  "y": -9892,
+  "width": 146,
+  "height": 24,
+  "backgroundColor": "#96f2d7",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "Shard 1  (keys A, D ...)",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-sh2",
+  "x": 5782,
+  "y": -9861,
+  "width": 146,
+  "height": 24,
+  "backgroundColor": "#96f2d7",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "Shard 2  (keys B, E ...)",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-sh3",
+  "x": 5782,
+  "y": -9830,
+  "width": 146,
+  "height": 24,
+  "backgroundColor": "#96f2d7",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "Shard 3  (keys C, F ...)",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-c1",
+  "x": 6010,
+  "y": -9913,
+  "width": 175,
+  "height": 30,
+  "backgroundColor": "#e6fcf5",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "Lambda (event source mapping)",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-c2",
+  "x": 6010,
+  "y": -9871,
+  "width": 175,
+  "height": 30,
+  "backgroundColor": "#e6fcf5",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "Firehose → S3 / Redshift",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "rectangle",
+  "id": "kds-c3",
+  "x": 6010,
+  "y": -9829,
+  "width": 175,
+  "height": 30,
+  "backgroundColor": "#e6fcf5",
+  "strokeWidth": 1,
+  "roughness": 0,
+  "label": {
+   "text": "Flink / KCL app (enhanced fan-out)",
+   "fontSize": 8.36
+  }
+ },
+ {
+  "type": "arrow",
+  "id": "kds-ai",
+  "start": {
+   "id": "kds-prod"
+  },
+  "end": {
+   "id": "kds-stream"
+  },
+  "strokeWidth": 1,
+  "roughness": 0
+ },
+ {
+  "type": "arrow",
+  "id": "kds-ao1",
+  "start": {
+   "id": "kds-stream"
+  },
+  "end": {
+   "id": "kds-c1"
+  },
+  "strokeWidth": 1,
+  "roughness": 0
+ },
+ {
+  "type": "arrow",
+  "id": "kds-ao2",
+  "start": {
+   "id": "kds-stream"
+  },
+  "end": {
+   "id": "kds-c2"
+  },
+  "strokeWidth": 1,
+  "roughness": 0
+ },
+ {
+  "type": "arrow",
+  "id": "kds-ao3",
+  "start": {
+   "id": "kds-stream"
+  },
+  "end": {
+   "id": "kds-c3"
+  },
+  "strokeWidth": 1,
+  "roughness": 0
+ },
+ {
+  "type": "text",
+  "id": "kds-tips",
+  "x": 5594,
+  "y": -9780,
+  "width": 167,
+  "height": 20,
+  "text": "- Exam Tips & Traps",
+  "fontSize": 16
+ },
+ {
+  "type": "text",
+  "id": "kds-tipst",
+  "x": 5609,
+  "y": -9752,
+  "width": 612,
+  "height": 42,
+  "text": "1. KDS = you run the consumers and can replay. Firehose = fully managed delivery to S3/Redshift/OpenSearch, no replay.\n2. ProvisionedThroughputExceeded: spread the partition key, add shards (split), or switch to on-demand.\n3. Many consumers on one stream with low latency: enhanced fan-out. Poison record in Lambda: bisect batch + on-failure destination.\n4. Kafka API or existing Kafka clients: Amazon MSK. Stateful windows/joins on the stream: Managed Service for Apache Flink.",
+  "fontSize": 8.5
+ }
+]

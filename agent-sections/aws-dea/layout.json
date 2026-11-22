@@ -1,0 +1,8 @@
+{
+ "colX": [5575, 6325, 7075, 7825],
+ "rowY0": -10948,
+ "rowStep": 679,
+ "firstRow": [2, 0, 0, 0],
+ "headingY": -11040,
+ "headings": ["Ingestion & Streaming", "Transform & Orchestrate", "Store & Analyze", "Security, Governance & Ops"]
+}
