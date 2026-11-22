@@ -17,6 +17,10 @@ const { addElements } = await import(join(M, "elements.mjs"));
 const TARGET = "aws-data-engineer-associate";
 const BASE_URL = "http://localhost:3000/";
 const dryRun = process.argv.includes("--dry-run");
+// chip list geometry (right of each material, up to CHIP.columns columns)
+const CHIP = { offset: 30, top: 30, w: 190, h: 28, gap: 6, columns: 2 };
+const CHIP_AREA =
+  CHIP.offset + CHIP.columns * CHIP.w + (CHIP.columns - 1) * CHIP.gap * 2 + 30;
 
 // service section title (after "- ") -> [short chip name, patterns]
 const SERVICES = [
@@ -126,6 +130,29 @@ const link = (scene) => {
       .sort((a, c) => a.y - c.y || a.x - c.x)[0];
     sectionBox.set(head.text.slice(2).trim(), b);
   }
+  const matRight = Math.max(
+    ...live
+      .filter(
+        (e) =>
+          e.type === "rectangle" &&
+          e.backgroundColor.toLowerCase() === "#fff4e6" &&
+          e.width > 1000 &&
+          !e.id.startsWith("legend-"),
+      )
+      .map((e) => e.x + e.width),
+  );
+  const svcLeft = Math.min(...[...sectionBox.values()].map((b) => b.x));
+  const needLeft = matRight + CHIP_AREA;
+  let servicesShifted = 0;
+  if (svcLeft < needLeft) {
+    servicesShifted = Math.round(needLeft - svcLeft);
+    for (const b of sectionBox.values()) {
+      for (const e of members(b.groupIds.at(-1))) {
+        e.x += servicesShifted;
+        touch(e);
+      }
+    }
+  }
   const href = (title) => `${BASE_URL}?element=${sectionBox.get(title).id}`;
 
   // drop chips from a previous run
@@ -171,41 +198,37 @@ const link = (scene) => {
         }
       }
     }
-    // chips under the material
+    // chips to the right of the material, listed top to bottom
     const chips = [];
-    let x = box.x;
-    const y = box.y + box.height + 10;
+    const x0 = box.x + box.width + CHIP.offset;
     const inputs = [
       {
         type: "text",
         id: `svc-chip-${row + 1}-label`,
-        x,
-        y: y + 6,
+        x: x0,
+        y: box.y,
         text: "Services:",
         fontSize: 14,
       },
     ];
-    x += 80;
-    let line = 0;
+    const perColumn = Math.floor(
+      (box.height - CHIP.top + CHIP.gap) / (CHIP.h + CHIP.gap),
+    );
     [...seen.values()].forEach((s, k) => {
-      const w = Math.round(s.short.length * 7 + 28);
-      if (x + w > box.x + box.width) {
-        line++; // wrap at the material's width
-        x = box.x + 80;
-      }
+      const col = Math.floor(k / perColumn);
+      const pos = k % perColumn;
       inputs.push({
         type: "rectangle",
         id: `svc-chip-${row + 1}-${k + 1}`,
-        x,
-        y: y + line * 34,
-        width: w,
-        height: 28,
+        x: x0 + col * (CHIP.w + CHIP.gap * 2),
+        y: box.y + CHIP.top + pos * (CHIP.h + CHIP.gap),
+        width: CHIP.w,
+        height: CHIP.h,
         backgroundColor: "#f3f0ff",
         strokeWidth: 1,
         roughness: 0,
         label: { text: `↗ ${s.short}`, fontSize: 12 },
       });
-      x += w + 8;
     });
     addElements(chips, inputs);
     for (const c of chips) {
@@ -223,7 +246,7 @@ const link = (scene) => {
       services: [...seen.values()].map((s) => s.short),
     });
   });
-  return report;
+  return { services_shifted_px: servicesShifted, rows: report };
 };
 
 if (dryRun) {

@@ -49,9 +49,10 @@ their own colours (e.g. the teal/mint cards in service sections).
   filling; only move the whole group.
 - When a material is finished (no `- Template` heading left), link it to the
   services it mentions: `node aws-dea/link_services.mjs`. An element naming one
-  service links straight to that section; a row of Violet-1 `↗ <service>` chips
-  under the material (in the material's group) links to every service it
-  mentions. Links use `http://localhost:3000/?element=<section box id>`. Rerun
+  service links straight to that section; a vertical list of Violet-1
+  `↗ <service>` chips on the right of the material (in the material's group,
+  a second column when more than 16) links to every service it mentions. The
+  service sections start right of that chip area. Links use `http://localhost:3000/?element=<section box id>`. Rerun
   it after finishing more materials (old chips are replaced).
 
 ## Service sections

@@ -38,7 +38,7 @@ const FILL = {
 const ROW0 = -10948; // top of the first material
 const STEP = 725; // material height 589 + gap
 const MAT = { x: 3838, w: 1609, h: 589 };
-const SVC_X0 = MAT.x + MAT.w + 90;
+const SVC_X0 = MAT.x + MAT.w + 452; // leaves room for the service chip list (link_services.mjs)
 const SVC_STEP = 750;
 const rowTop = (i) => ROW0 + i * STEP;
 const rowMid = (i) => rowTop(i) + MAT.h / 2;
