@@ -7,3 +7,57 @@
 {"material": 7, "lesson": "dea-msk-and-flink", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 332, "usage": {"input_tokens": 67394, "output_tokens": 29245, "thinking_tokens": 14155, "cache_read_tokens": 426566, "total_tokens": 96639}, "error": null, "problems": []}
 {"material": 5, "lesson": "dea-kinesis-data-streams", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 382, "usage": {"input_tokens": 55122, "output_tokens": 38627, "thinking_tokens": 23432, "cache_read_tokens": 388370, "total_tokens": 93749}, "error": null, "problems": []}
 {"material": 4, "lesson": "dea-distributed-computing-concepts", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 613, "usage": {"input_tokens": 91229, "output_tokens": 46482, "thinking_tokens": 28794, "cache_read_tokens": 830777, "total_tokens": 137711}, "error": null, "problems": []}
+{"material": 9, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 77, "problems": []}
+{"material": 9, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 668, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 9, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 338, "problems": []}
+{"material": 11, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 62, "problems": []}
+{"material": 10, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 83, "problems": []}
+{"material": 10, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 251, "problems": []}
+{"material": 11, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 321, "problems": []}
+{"material": 12, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 90, "problems": []}
+{"material": 13, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 61, "problems": []}
+{"material": 13, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 135, "problems": []}
+{"material": 14, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 67, "problems": []}
+{"material": 9, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 658, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 14, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 333, "problems": []}
+{"material": 15, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 60, "problems": []}
+{"material": 12, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 662, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 15, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 90, "problems": []}
+{"material": 16, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 103, "problems": []}
+{"material": 12, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 224, "problems": []}
+{"material": 9, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 658, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 17, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 72, "problems": []}
+{"material": 16, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 239, "problems": []}
+{"material": 18, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 72, "problems": []}
+{"material": 18, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 165, "problems": []}
+{"material": 19, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 69, "problems": []}
+{"material": 17, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 511, "problems": []}
+{"material": 20, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 68, "problems": []}
+{"material": 9, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 659, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 19, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 344, "problems": []}
+{"material": 20, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 237, "problems": []}
+{"material": 21, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 96, "problems": []}
+{"material": 22, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 73, "problems": []}
+{"material": 22, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 97, "problems": []}
+{"material": 23, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 72, "problems": []}
+{"material": 21, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 301, "problems": []}
+{"material": 24, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 82, "problems": []}
+{"material": 9, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 642, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 25, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 77, "problems": []}
+{"material": 23, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 603, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 24, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 453, "problems": []}
+{"material": 26, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 73, "problems": []}
+{"material": 25, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 606, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 25, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 98, "problems": ["the material is too long for the fixed box (material 25 doesn't fit (bottom 636); shorten the spec). Shorten every text, drop the least important points but keep one short line per subtopic"]}
+{"material": 23, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 611, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 26, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 615, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 23, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 121, "problems": []}
+{"material": 26, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 96, "problems": []}
+{"material": 27, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 83, "problems": []}
+{"material": 28, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 53, "problems": []}
+{"material": 25, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 601, "problems": []}
+{"material": 29, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 83, "problems": []}
+{"material": 27, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 613, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 28, "step": "write", "model": "gemini-4-neon-medium", "status": "ERROR", "seconds": 613, "problems": ["no JSON in the reply (print timeout after 10m0s with the turn still in progress; the response is partial)"]}
+{"material": 29, "step": "write", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 423, "problems": []}
+{"material": 30, "step": "design", "model": "gemini-4-neon-medium", "status": "SUCCESS", "seconds": 66, "problems": []}

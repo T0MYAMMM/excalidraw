@@ -1,0 +1,264 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Incremental & safe",
+     "name": "External APIs",
+     "tag": "Secrets Manager · Lambda · Glue · AppFlow",
+     "text": "Follow pagination cursors for incremental pulls. Store auth in Secrets Manager; write idempotently via Lambda, Glue, or AppFlow."
+    },
+    {
+     "keyword": "Backoff + jitter",
+     "name": "Rate Limits",
+     "tag": "SQS · Lambda · AWS SDK",
+     "text": "Handle 429/Retry-After with exponential backoff + jitter (SDK standard/adaptive). Buffer spikes in SQS with max concurrency."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "caption": "NAT Gateway = stable outbound IP; security groups = inbound access control.",
+   "col": "left",
+   "heading": "IP allowlists: outbound vs inbound",
+   "left": {
+    "points": [
+     "Run Lambda, Glue, or EMR in private subnets",
+     "Route egress through NAT Gateway + Elastic IP",
+     "Share that stable Elastic IP with external partners",
+     "Non-VPC Lambda has no fixed egress IP"
+    ],
+    "title": "Outbound allowlists"
+   },
+   "right": {
+    "points": [
+     "Protect AWS targets with security groups",
+     "Allow only needed ports from CIDRs or SG refs",
+     "Prefer referencing security groups over static IPs",
+     "Redshift: allow regional Firehose CIDR for loads"
+    ],
+    "title": "Inbound control"
+   },
+   "type": "compare"
+  },
+  {
+   "col": "left",
+   "items": [
+    "No immediate retry loops — use backoff + jitter; raising Lambda timeout won't fix throttling (scale capacity/pools).",
+    "NAT Gateway provides a stable outbound IP; security groups control inbound access to AWS resources.",
+    "Never hard-code API keys or pass them in job parameters — store them in Secrets Manager with rotation.",
+    "API Gateway caching lowers backend load on repeat reads, but cached responses can be stale."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Service",
+    "Signal",
+    "Fixes"
+   ],
+   "heading": "Throttling: AWS data services",
+   "rows": [
+    [
+     "DynamoDB",
+     "ProvisionedThroughputExceeded / ThrottlingException",
+     "On-demand, auto scaling, partition key (no hot keys), DAX, backoff"
+    ],
+    [
+     "Kinesis Streams",
+     "ProvisionedThroughputExceededException",
+     "More shards/on-demand, high-cardinality keys, KPL, enhanced fan-out"
+    ],
+    [
+     "RDS / Aurora",
+     "Too many connections, CPU saturation",
+     "RDS Proxy pooling, read replicas, limit job concurrency"
+    ],
+    [
+     "Lambda",
+     "TooManyRequestsException (429)",
+     "Reserved concurrency, raise quota, SQS buffering"
+    ],
+    [
+     "AWS APIs",
+     "ThrottlingException / Rate exceeded",
+     "SDK backoff retries, batch APIs, quota increase"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "caption": "API GW enforces rate/burst throttling (429) at account, stage, method & usage-plan levels.",
+   "col": "middle",
+   "heading": "Creating data APIs on AWS",
+   "top": "Programmatic Data Access",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "+ Lambda: auth/cache",
+      "Direct: DDB/KDS/SQS",
+      "Token-bucket 429"
+     ],
+     "title": "API Gateway"
+    },
+    {
+     "items": [
+      "Async HTTPS SQL",
+      "IAM / Secrets Manager",
+      "No drivers/pools"
+     ],
+     "title": "Redshift Data API"
+    },
+    {
+     "items": [
+      "Athena API (S3 lake)",
+      "RDS Data API (Aurora)",
+      "No conn management"
+     ],
+     "title": "SQL Data APIs"
+    },
+    {
+     "items": [
+      "Publish APIs as data",
+      "Managed subscribers"
+     ],
+     "title": "Data Exchange"
+    }
+   ]
+  },
+  {
+   "col": "right",
+   "edges": [
+    {
+     "from": "eb",
+     "label": "schedule",
+     "to": "lam"
+    },
+    {
+     "from": "lam",
+     "label": "NAT EIP+retry",
+     "to": "api"
+    },
+    {
+     "from": "lam",
+     "label": "raw ingest",
+     "to": "s3"
+    },
+    {
+     "from": "s3",
+     "label": "transform",
+     "to": "glue"
+    },
+    {
+     "from": "glue",
+     "label": "load curated",
+     "to": "ddb"
+    },
+    {
+     "from": "cons",
+     "label": "HTTPS",
+     "to": "apigw"
+    },
+    {
+     "from": "apigw",
+     "label": "rate-limited",
+     "to": "ddb"
+    }
+   ],
+   "groups": [
+    {
+     "nodes": [
+      {
+       "id": "eb",
+       "label": "EventBridge hourly"
+      },
+      {
+       "id": "lam",
+       "label": "Private Lambda+SM"
+      },
+      {
+       "id": "api",
+       "label": "Partner API (429)"
+      }
+     ],
+     "title": "1. Pull"
+    },
+    {
+     "nodes": [
+      {
+       "id": "s3",
+       "label": "S3 Raw (by hour)"
+      },
+      {
+       "id": "glue",
+       "label": "Glue Curated Job"
+      }
+     ],
+     "title": "2. Curate"
+    },
+    {
+     "nodes": [
+      {
+       "id": "ddb",
+       "label": "DynamoDB Table"
+      },
+      {
+       "id": "apigw",
+       "label": "API GW (IAM/cache)"
+      },
+      {
+       "id": "cons",
+       "label": "API Consumers"
+      }
+     ],
+     "title": "3. Serve"
+    }
+   ],
+   "heading": "Ingest-to-API pattern",
+   "height": 175,
+   "type": "flowchart"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Lambda exhausts DB connections",
+     "RDS Proxy",
+     "Pools and multiplexes connections"
+    ],
+    [
+     "DynamoDB hot keys or unpredictable load",
+     "Redesign key/sharding or On-demand",
+     "Spreads load; scales without planning"
+    ],
+    [
+     "External API requires fixed IP",
+     "Private subnet + NAT GW Elastic IP",
+     "Provides a stable egress IP"
+    ],
+    [
+     "Query Redshift from Lambda, no drivers",
+     "Redshift Data API",
+     "Async HTTPS with IAM auth"
+    ],
+    [
+     "Expose curated REST API + rate limits",
+     "API Gateway (+ Lambda or direct)",
+     "Built-in throttling, auth, caching"
+    ],
+    [
+     "Protect rate-limited downstream",
+     "SQS buffer + consumer concurrency",
+     "Smooths traffic spikes"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Data APIs, Throttling, Rate Limits & IP Allowlists"
+}

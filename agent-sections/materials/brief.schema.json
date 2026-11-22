@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Material design brief",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["blocks", "coverage"],
+  "properties": {
+    "blocks": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "col", "why"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["concepts", "callouts", "compare", "timeline", "pipeline", "decision_tree", "pairs", "cluster", "flowchart", "table", "decisions", "tips"]
+          },
+          "col": { "type": "string", "enum": ["left", "middle", "right", "middle-right"] },
+          "heading": { "type": "string", "maxLength": 40 },
+          "count": { "type": "integer", "minimum": 2, "maximum": 4 },
+          "height": { "type": "integer", "minimum": 120, "maximum": 260 },
+          "why": { "type": "string", "maxLength": 220 }
+        }
+      }
+    },
+    "coverage": {
+      "type": "array",
+      "description": "Every lesson subtopic and the 1-based index of the block that summarises it.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["topic", "block"],
+        "properties": {
+          "topic": { "type": "string", "maxLength": 120 },
+          "block": { "type": "integer", "minimum": 1 }
+        }
+      }
+    }
+  }
+}

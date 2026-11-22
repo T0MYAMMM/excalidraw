@@ -1,0 +1,229 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Retention & KMS",
+     "name": "CloudWatch Logs",
+     "tag": "Amazon CloudWatch Logs",
+     "text": "Log groups hold streams with KMS encryption & retention. CW agent collects EC2/EMR logs; Glue, Lambda & MWAA log to preset paths."
+    },
+    {
+     "keyword": "Stream & query",
+     "name": "Filters & Exports",
+     "tag": "CloudWatch Logs Insights",
+     "text": "Metric filters turn log patterns into metrics; subscription filters stream in near real time. Export to S3 or query with Logs Insights."
+    },
+    {
+     "keyword": "Metrics vs events",
+     "name": "Alarms & Events",
+     "tag": "Amazon CloudWatch, Amazon SNS, EventBridge",
+     "text": "Alarms track metrics, math or anomaly bands (OK/ALARM/INSUFFICIENT_DATA) & composite alarms -> SNS. Use EventBridge -> SNS for job events."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Log retention defaults to never expire; always set an explicit retention policy to prevent runaway storage costs.",
+    "Alarms evaluate metrics; for state-change events (e.g. Glue job FAILED), route through EventBridge to SNS.",
+    "Metric filters only match new log events (no backfill); stream logs to S3 via subscription filters to Firehose.",
+    "CloudTrail records who called which API; CloudWatch monitors how the system is behaving."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Service",
+    "Key metrics",
+    "Reveals"
+   ],
+   "heading": "Key pipeline metrics",
+   "rows": [
+    [
+     "Kinesis & Firehose",
+     "IteratorAgeMs, ProvisionedThroughputExceeded, DeliveryToS3/Redshift",
+     "Consumer lag, hot shards/throttling, delivery health & freshness"
+    ],
+    [
+     "Lambda & Glue",
+     "Errors, Throttles, Duration, IteratorAge; bytesRead, jvm.heap, execs",
+     "Failures, lag, capacity; Glue throughput, memory pressure & scaling"
+    ],
+    [
+     "SQS & DynamoDB",
+     "AgeOfOldestMessage, MessagesVisible; ThrottledRequests, ConsumedWCU",
+     "Queue backlog and DynamoDB write/read capacity throttling"
+    ],
+    [
+     "Redshift & Step Fn",
+     "CPU, DiskSpaceUsed, QueryDuration, WLM; ExecutionsFailed/TimedOut",
+     "Cluster health, queue wait & workflow execution failures"
+    ],
+    [
+     "Custom metrics",
+     "PutMetricData API or Embedded Metric Format (EMF) JSON logs",
+     "App-specific metrics with namespace, name & dimensions"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "branch": {
+    "from": 0,
+    "label": "Retention compliance",
+    "target": "AWS Config rule + auto-remediation"
+   },
+   "col": "middle",
+   "heading": "Logging & alerting as code",
+   "stages": [
+    {
+     "label": "LogGroup (IaC)",
+     "note": "RetentionInDays + KMS key"
+    },
+    {
+     "label": "MetricFilter",
+     "note": "JSON pattern -> custom metric"
+    },
+    {
+     "label": "CloudWatch Alarm",
+     "note": "Sum >= threshold over period"
+    },
+    {
+     "label": "SNS OpsTopic",
+     "note": "Email, SMS, chat or Lambda alert"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "right",
+   "edges": [
+    {
+     "from": "acc_a",
+     "label": "sub filter",
+     "to": "fh"
+    },
+    {
+     "from": "acc_b",
+     "label": "sub filter",
+     "to": "fh"
+    },
+    {
+     "from": "fh",
+     "label": "archive",
+     "to": "s3"
+    },
+    {
+     "from": "fh",
+     "label": "index",
+     "to": "os"
+    },
+    {
+     "from": "alarms",
+     "label": "notify",
+     "to": "sns"
+    },
+    {
+     "from": "alarms",
+     "label": "cross-acct",
+     "to": "viz"
+    }
+   ],
+   "groups": [
+    {
+     "nodes": [
+      {
+       "id": "acc_a",
+       "label": "Account A log groups"
+      },
+      {
+       "id": "acc_b",
+       "label": "Account B log groups"
+      },
+      {
+       "id": "alarms",
+       "label": "CloudWatch Alarms"
+      }
+     ],
+     "title": "Sources"
+    },
+    {
+     "nodes": [
+      {
+       "id": "fh",
+       "label": "Central Firehose"
+      },
+      {
+       "id": "sns",
+       "label": "SNS (email/chat)"
+      }
+     ],
+     "title": "Central Hub"
+    },
+    {
+     "nodes": [
+      {
+       "id": "s3",
+       "label": "S3 archive -> Athena"
+      },
+      {
+       "id": "os",
+       "label": "OpenSearch dashboards"
+      },
+      {
+       "id": "viz",
+       "label": "CW / Managed Grafana"
+      }
+     ],
+     "title": "Analytics & UI"
+    }
+   ],
+   "heading": "Central observability",
+   "height": 175,
+   "type": "flowchart"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Alert when stream consumer falls behind",
+     "Alarm on IteratorAgeMilliseconds -> SNS",
+     "Measures consumer lag directly"
+    ],
+    [
+     "Alert on a specific error log pattern",
+     "Metric filter + CloudWatch alarm",
+     "Converts log patterns into metrics"
+    ],
+    [
+     "Stream logs to OpenSearch near real time",
+     "Subscription filter (-> Firehose/OS)",
+     "Near real-time log delivery"
+    ],
+    [
+     "Notify team when any Glue job fails",
+     "EventBridge rule (FAILED) -> SNS",
+     "Event-driven with no polling"
+    ],
+    [
+     "Control log cost & enforce KMS encryption",
+     "Set retention + KMS key in LogGroup IaC",
+     "Default never expires; KMS encrypts"
+    ],
+    [
+     "Collect OS logs/metrics from EC2 or EMR",
+     "Install Amazon CloudWatch agent",
+     "Gathers host-level logs & metrics"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Monitoring Data Pipelines with Amazon CloudWatch"
+}

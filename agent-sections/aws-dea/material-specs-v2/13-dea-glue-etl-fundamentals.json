@@ -1,0 +1,252 @@
+{
+ "blocks": [
+  {
+   "caption": "Catalog shared by Athena, EMR & Spectrum; Crawlers infer schemas; Notebooks & Studio author PySpark.",
+   "col": "left",
+   "heading": "Glue components",
+   "top": "AWS Glue Platform",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "Data Catalog",
+      "Crawlers"
+     ],
+     "title": "Catalog & Schema"
+    },
+    {
+     "items": [
+      "Jobs (serverless)",
+      "Triggers & workflows"
+     ],
+     "title": "Execution"
+    },
+    {
+     "items": [
+      "Connections (JDBC/VPC)",
+      "Glue Studio",
+      "Interactive sessions"
+     ],
+     "title": "Authoring & Conn"
+    },
+    {
+     "items": [
+      "Data Quality",
+      "DataBrew (no-code)",
+      "Schema Registry"
+     ],
+     "title": "Prep & Governance"
+    }
+   ]
+  },
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Incremental state",
+     "name": "Job bookmarks",
+     "tag": "AWS Glue",
+     "text": "Tracks S3 timestamps or monotonic JDBC keys to read only new data. Enable flag, set transformation_ctx, call job.init() & commit()."
+    },
+    {
+     "keyword": "Join & curate",
+     "name": "Multi-source ETL",
+     "tag": "AWS Glue",
+     "text": "Joins JDBC (Aurora/RDS) & S3 catalog tables, writes Parquet/Iceberg, updates catalog. Author visually in Glue Studio (editable PySpark)."
+    },
+    {
+     "keyword": "Micro-batches",
+     "name": "Streaming ETL",
+     "tag": "AWS Glue",
+     "text": "Reads Kinesis, MSK, or Kafka in micro-batches to S3/catalog. Use Managed Service for Apache Flink for sub-second or stateful logic."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "heading": "Exam tips & traps",
+   "items": [
+    "Bookmark job reprocessing everything -> missing transformation_ctx or job.commit().",
+    "Private VPC timeout -> missing S3 gateway endpoint or self-referencing SG rule.",
+    "Python shell is single-process (not for TB); Spark has startup overhead -> use Lambda for tiny tasks.",
+    "Never hardcode DB passwords in job scripts -> store in Secrets Manager and reference in the connection."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Job type",
+    "Engine",
+    "Best for"
+   ],
+   "heading": "Job types",
+   "rows": [
+    [
+     "Spark",
+     "Distributed Apache Spark",
+     "Large batch ETL, joins, format conversion"
+    ],
+    [
+     "Spark Streaming",
+     "Structured Streaming (micro-batch)",
+     "Continuous Kinesis/MSK/Kafka ETL to S3"
+    ],
+    [
+     "Python shell",
+     "Single Python process",
+     "Small scripts: APIs, Redshift SQL, light files"
+    ],
+    [
+     "Ray",
+     "Distributed Python (Ray)",
+     "Scaling plain Python & pandas workloads"
+    ],
+    [
+     "Billing (DPU)",
+     "1 DPU = 4 vCPU, 16 GB RAM",
+     "Billed per DPU-hour (short min); avoid idle"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "caption": "Convert freely via toDF() and DynamicFrame.fromDF().",
+   "col": "middle",
+   "heading": "DynamicFrame vs DataFrame",
+   "left": {
+    "points": [
+     "Self-describing: each record carries its schema",
+     "Keeps mixed types as choice types (ResolveChoice)",
+     "Glue transforms: ApplyMapping, Relationalize, DropNullFields",
+     "Best for messy, semi-structured sources"
+    ],
+    "title": "DynamicFrame"
+   },
+   "right": {
+    "points": [
+     "Requires a single, fixed schema",
+     "Full Spark SQL API and complex joins",
+     "Best for structured relational transforms"
+    ],
+    "title": "DataFrame"
+   },
+   "type": "compare"
+  },
+  {
+   "col": "right",
+   "edges": [
+    {
+     "from": "glue",
+     "label": "JDBC / DX-VPN",
+     "to": "rds"
+    },
+    {
+     "from": "glue",
+     "label": "S3 route",
+     "to": "s3ep"
+    },
+    {
+     "from": "s3ep",
+     "label": "scripts/data",
+     "to": "s3"
+    },
+    {
+     "from": "glue",
+     "label": "DB creds",
+     "to": "sm"
+    },
+    {
+     "from": "glue",
+     "label": "metadata",
+     "to": "cat"
+    }
+   ],
+   "groups": [
+    {
+     "nodes": [
+      {
+       "id": "glue",
+       "label": "Glue ENIs (self SG)"
+      }
+     ],
+     "title": "VPC Private Subnet"
+    },
+    {
+     "nodes": [
+      {
+       "id": "rds",
+       "label": "RDS / Aurora / On-prem"
+      },
+      {
+       "id": "s3ep",
+       "label": "S3 gateway endpoint"
+      }
+     ],
+     "title": "VPC Targets"
+    },
+    {
+     "nodes": [
+      {
+       "id": "s3",
+       "label": "S3 data lake"
+      },
+      {
+       "id": "sm",
+       "label": "Secrets Manager"
+      },
+      {
+       "id": "cat",
+       "label": "Glue Data Catalog"
+      }
+     ],
+     "title": "AWS Services"
+    }
+   ],
+   "heading": "Private VPC & JDBC access",
+   "height": 170,
+   "type": "flowchart"
+  },
+  {
+   "col": "right",
+   "heading": "Decision guide",
+   "rows": [
+    [
+     "Serverless Spark batch or Kinesis streaming ETL",
+     "Glue Spark or Streaming job",
+     "No cluster; micro-batch Structured Streaming"
+    ],
+    [
+     "Lightweight API/SQL script (<15 min, small)",
+     "Python shell (or Lambda)",
+     "No Spark cost or startup overhead"
+    ],
+    [
+     "Process only new files each night",
+     "Job bookmarks",
+     "Built-in incremental state"
+    ],
+    [
+     "Mixed column types or deeply nested JSON",
+     "ResolveChoice / Relationalize",
+     "DynamicFrame handles choice types & flattening"
+    ],
+    [
+     "Glue job times out reaching private RDS",
+     "Self-ref SG + S3 endpoint",
+     "Required Glue VPC networking"
+    ],
+    [
+     "Analysts want no-code visual ETL",
+     "Glue Studio or DataBrew",
+     "Visual drag-and-drop authoring"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "AWS Glue ETL Fundamentals – Jobs, DynamicFrames & Bookmarks"
+}

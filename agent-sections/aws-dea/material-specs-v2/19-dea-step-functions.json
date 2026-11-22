@@ -1,0 +1,181 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Key limits & scale",
+   "items": [
+    {
+     "label": "Standard max duration",
+     "value": "1 year"
+    },
+    {
+     "label": "Express max duration",
+     "value": "5 min"
+    },
+    {
+     "label": "Distributed Map child runs",
+     "value": "10,000"
+    },
+    {
+     "label": "Standard history (200+ APIs)",
+     "value": "90 days"
+    }
+   ],
+   "type": "callouts"
+  },
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "JSON workflow",
+     "name": "ASL states",
+     "tag": "AWS Step Functions",
+     "text": "Task calls Lambda or 200+ AWS services; Choice branches; Parallel/Map fan out; Wait pauses; Pass, Succeed, Fail control flow."
+    },
+    {
+     "keyword": "Big S3 datasets",
+     "name": "Distributed Map",
+     "tag": "AWS Step Functions, Amazon S3",
+     "text": "Reads S3 listings, CSV, JSON, or manifests; runs up to 10,000 child executions with batching, error tolerance, and S3 output."
+    },
+    {
+     "keyword": "$0 when idle",
+     "name": "Serverless flow",
+     "tag": "EventBridge, API Gateway",
+     "text": "No servers to manage, $0 idle; triggers via EventBridge or API Gateway and deploys via SAM/CDK with Lambda, Glue, Athena, DynamoDB."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "No Lambda/Wait polling loops; use .sync (Standard bills/transition).",
+    "Express caps at 5 min with no .sync/callbacks; use Standard for ETL.",
+    "Use Retry (backoff/jitter) for errors and Catch to alert via SNS.",
+    "Check Standard's 90-day visual history first; IAM role needs all actions."
+   ],
+   "type": "tips"
+  },
+  {
+   "caption": "Long ETL (>5 min), .sync, and callbacks require Standard.",
+   "col": "middle",
+   "heading": "Standard vs Express workflows",
+   "left": {
+    "points": [
+     "Up to 1 yr max; exactly-once execution",
+     "Billed per state transition",
+     "90-day visual execution history",
+     "Long ETL, .sync jobs, callbacks"
+    ],
+    "title": "Standard"
+   },
+   "right": {
+    "points": [
+     "Up to 5 min; at-least / at-most-once",
+     "Billed per request + duration/memory",
+     "Logs sent to CloudWatch Logs",
+     "High-volume short events (IoT, streams)"
+    ],
+    "title": "Express"
+   },
+   "type": "compare"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Pattern",
+    "Behavior",
+    "Use"
+   ],
+   "heading": "Service integration patterns",
+   "rows": [
+    [
+     "Request-Response",
+     "Calls API, continues immediately",
+     "Default; fire-and-forget APIs"
+    ],
+    [
+     ".sync",
+     "Waits until job finishes; no polling",
+     "Glue, EMR, Athena, Batch, ECS, SageMaker"
+    ],
+    [
+     ".waitForTaskToken",
+     "Pauses for SendTaskSuccess/Failure",
+     "Human approvals, SQS, external apps"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "branch": {
+    "from": 4,
+    "label": "Catch / DQ fail",
+    "target": "SNS alert"
+   },
+   "col": "right",
+   "heading": "ETL pipeline & error handling",
+   "stages": [
+    {
+     "label": "EventBridge"
+    },
+    {
+     "label": "SFN Standard"
+    },
+    {
+     "label": "Glue .sync (Retry)"
+    },
+    {
+     "label": "Parallel: Crawler+DQ"
+    },
+    {
+     "label": "Choice: DQ passed?"
+    },
+    {
+     "label": "Redshift MV"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Serverless Glue/Lambda/Athena",
+     "Step Functions Standard",
+     "Managed, visual, native APIs"
+    ],
+    [
+     "Wait for Glue job or EMR step",
+     ".sync integration",
+     "Waits natively; no polling"
+    ],
+    [
+     "Human approval / external reply",
+     ".waitForTaskToken",
+     "Callback via task token APIs"
+    ],
+    [
+     "Millions of S3 objects parallel",
+     "Distributed Map",
+     "Up to 10k parallel child runs"
+    ],
+    [
+     "High-volume, <5 min events",
+     "Express workflows",
+     "Billed per request + duration"
+    ],
+    [
+     "Python DAGs vs Glue-only jobs",
+     "MWAA / Glue workflows",
+     "Airflow plugins vs Glue-native"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "AWS Step Functions – Serverless Data Pipeline Orchestration"
+}

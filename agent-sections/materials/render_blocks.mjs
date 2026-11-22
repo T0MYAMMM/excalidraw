@@ -28,6 +28,7 @@ const MAX_GAP = 90; // most extra space added between two blocks of a column
 const TOP = { left: 77, middle: 79, right: 79 };
 const BOTTOM = 582;
 const MAX_COL_SCALE = 1.4; // a sparse column may grow its text up to this
+const MIN_SCALE = 1; // smallest readable text (tables 8.5 px, notes 9 px)
 const newId = () => randomBytes(10).toString("base64url");
 
 const wrap = (text, width, fs, perChar = W) => {
@@ -47,6 +48,27 @@ const wrap = (text, width, fs, perChar = W) => {
     out.push(line);
   }
   return out;
+};
+
+// Splits words longer than maxChars at CamelCase/slash boundaries so labels
+// like "RedshiftDataOperator" can wrap instead of overflowing their box.
+const splitLong = (label, maxChars) =>
+  String(label)
+    .split(" ")
+    .map((w) =>
+      w.length <= maxChars
+        ? w
+        : w.replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/\/(?=\S)/g, "/ "),
+    )
+    .join(" ");
+
+// Font for box labels: the block size, shrunk (not below 8) so the longest
+// remaining word fits the box width.
+const boxFont = (labels, base, width) => {
+  const word = Math.max(
+    ...labels.flatMap((l) => l.split(/\s+/).map((w) => w.length)),
+  );
+  return Math.max(8, Math.min(base, width / (word * 0.6)));
 };
 
 /**
@@ -336,8 +358,10 @@ const layout = (box, spec, sc, tipsFs) => {
       const n = b.stages.length;
       const gap = 24;
       const sw = (w - (n - 1) * gap) / n;
-      const fs = 9.5 * s;
-      const labels = b.stages.map((st) => wrap(st.label, sw - 10, fs));
+      const maxChars = Math.floor((sw - 16) / (9.5 * s * 0.6));
+      const texts = b.stages.map((st) => splitLong(st.label, maxChars));
+      const fs = boxFont(texts, 9.5 * s, sw - 16);
+      const labels = texts.map((l) => wrap(l, sw - 16, fs, 0.56));
       const sh = Math.max(
         34,
         Math.max(...labels.map((l) => l.length)) * fs * 1.25 + 12,
@@ -556,7 +580,7 @@ const layout = (box, spec, sc, tipsFs) => {
       const h = heading(x, y, b.heading, inputs);
       const fh = (b.height ?? 200) * s;
       const groups = b.groups;
-      const gap = 16;
+      const gap = 26; // room for edge labels between groups
       const fw = (w - gap * (groups.length - 1)) / groups.length;
       const nodeId = new Map();
       const centers = new Map();
@@ -581,7 +605,12 @@ const layout = (box, spec, sc, tipsFs) => {
         grp.nodes.forEach((nd, ni) => {
           const id = newId();
           nodeId.set(nd.id, id);
-          const lines = wrap(nd.label, fw - 18, 9 * s);
+          const text = splitLong(
+            nd.label,
+            Math.floor((fw - 32) / (9 * s * 0.6)),
+          );
+          const nfs = boxFont([text], 9 * s, fw - 32);
+          const lines = wrap(text, fw - 30, nfs, 0.56);
           const nh = Math.max(28, lines.length * 9.4 * s + 8);
           const ny =
             y + h + 18 + ((ni + 0.5) * (fh - 22)) / grp.nodes.length - nh / 2;
@@ -590,7 +619,7 @@ const layout = (box, spec, sc, tipsFs) => {
             rect(fx + 8, ny, fw - 16, nh, {
               id,
               backgroundColor: "#e6fcf5",
-              label: { text: lines.join("\n"), fontSize: 9 * s },
+              label: { text: lines.join("\n"), fontSize: nfs },
             }),
           );
         });
@@ -629,7 +658,10 @@ const layout = (box, spec, sc, tipsFs) => {
         naturalSum > w ? natural.map((n) => (n / naturalSum) * w) : natural;
       const fix = [];
       rows.forEach((r, ri) => {
-        const wrapped = r.map((cell, c) => wrap(cell, widths[c] - PAD * 2, fs));
+        // 0.54: capitals and slashes run wider than average Nunito text
+        const wrapped = r.map((cell, c) =>
+          wrap(cell, widths[c] - PAD * 2 - 2, fs, 0.54),
+        );
         const rh =
           Math.max(...wrapped.map((l) => l.length)) * fs * 1.25 + PAD * 2 + 2;
         let cx = x;
@@ -796,29 +828,33 @@ export const renderBlocks = (scene, row, spec) => {
       `material ${row} has no template left; set replace_existing to redesign it`,
     );
   }
-  // fit: scale text down until every column ends above the box bottom
-  let s = 1;
-  let plan;
-  for (s = 1.3; s >= 0.78; s -= 0.04) {
-    plan = layout(box, spec, s, 12 * s);
-    if (plan.bottom <= BOTTOM) {
-      break;
-    }
+  // fit: every column starts at the smallest readable scale; a column that
+  // doesn't fit even then means the spec is too long (the agent shortens it)
+  const sc = { left: MIN_SCALE, middle: MIN_SCALE, right: MIN_SCALE };
+  let tipsFs = 12;
+  let plan = layout(box, spec, sc, tipsFs);
+  if (plan.bottom > BOTTOM) {
+    const over = Object.entries(plan.cols)
+      .filter(([, b]) => b > BOTTOM)
+      .map(([c, b]) => `${c} column ends at ${Math.round(b)}`);
+    throw new Error(
+      `material ${row} doesn't fit (${over.join(
+        ", ",
+      )}; limit ${BOTTOM}); shorten the spec`,
+    );
   }
   // tips as large as the left column allows (12-16 px)
-  let tipsFs = 12 * s;
-  for (let t = 16; t > 12 * s; t -= 0.5) {
-    const trial = layout(box, spec, s, t);
-    if (trial.bottom <= BOTTOM && trial.leftBottom <= BOTTOM) {
+  for (let t = 16; t > 12; t -= 0.5) {
+    const trial = layout(box, spec, sc, t);
+    if (trial.bottom <= BOTTOM) {
       plan = trial;
       tipsFs = t;
       break;
     }
   }
-  // sparse middle/right columns grow their text before gaps fill the rest
-  const sc = { left: s, middle: s, right: s };
-  if (plan.bottom <= BOTTOM) {
-    for (const col of ["middle", "right"]) {
+  // then each column grows its own text to fill its height
+  for (let pass = 0; pass < 2; pass++) {
+    for (const col of ["left", "middle", "right"]) {
       for (let g = MAX_COL_SCALE; g > sc[col] + 0.001; g -= 0.02) {
         const trial = layout(box, spec, { ...sc, [col]: g }, tipsFs);
         if (trial.bottom <= BOTTOM) {

@@ -1,0 +1,222 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Key numbers & thresholds",
+   "items": [
+    {
+     "label": "4 vCPUs / 16 GB RAM",
+     "value": "1 DPU"
+    },
+    {
+     "label": "Auto groupFiles (~128 MB)",
+     "value": ">50k files"
+    },
+    {
+     "label": "Target output file size",
+     "value": "128 MB–1 GB"
+    }
+   ],
+   "type": "callouts"
+  },
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Prune & skip",
+     "name": "Reading less",
+     "tag": "AWS Glue",
+     "text": "Pushdown predicates & partition indexes prune early. Parquet/ORC skips columns; bookmarks skip old data."
+    },
+    {
+     "keyword": "Group & compact",
+     "name": "Small files",
+     "tag": "AWS Glue, Amazon S3",
+     "text": "groupFiles/groupSize groups tiny S3 inputs to ease driver RAM. Coalesce/repartition targets 128 MB–1 GB output."
+    },
+    {
+     "keyword": "Guardrails",
+     "name": "Reliability",
+     "tag": "AWS Glue",
+     "text": "Set job timeout to cap hung runs, max retries for transient errors, and max concurrency for bookmark safety."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Adding workers won't fix skew or driver OOM; fix code/layout.",
+    ".filter() doesn't prune partitions; use push_down_predicate.",
+    "GZIP CSV/JSON isn't splittable; one big .gz uses 1 task.",
+    "Skip Flex under an SLA; use Python shell for small non-Spark jobs."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Worker",
+    "Size",
+    "Use for"
+   ],
+   "heading": "Worker types & auto scaling",
+   "rows": [
+    [
+     "G.025X",
+     "0.25 DPU",
+     "Low-volume streaming jobs"
+    ],
+    [
+     "G.1X",
+     "1 DPU",
+     "Batch transforms, joins, format conversion"
+    ],
+    [
+     "G.2X",
+     "2 DPU",
+     "Memory-heavy transforms, ML, shuffles"
+    ],
+    [
+     "G.4X / G.8X",
+     "4 / 8 DPU",
+     "Heaviest aggregations and joins"
+    ],
+    [
+     "Auto scaling",
+     "Glue 3.0+",
+     "Set max workers; scales executors per stage"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "caption": "Enable Flex on Spark jobs with --execution-class FLEX.",
+   "col": "middle",
+   "heading": "Standard vs Flex execution",
+   "left": {
+    "points": [
+     "Dedicated capacity",
+     "Predictable start & runtime",
+     "SLA-bound jobs & dashboards"
+    ],
+    "title": "Standard"
+   },
+   "right": {
+    "points": [
+     "Spare capacity, lower cost",
+     "Variable start & runtime",
+     "Backfills, tests & non-urgent batch"
+    ],
+    "title": "Flex"
+   },
+   "type": "compare"
+  },
+  {
+   "caption": "Repartition on join key before joins; coalesce (no shuffle) before writes.",
+   "col": "middle",
+   "heading": "Code-level optimization",
+   "top": "Spark job tuning",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "Filter & select early",
+      "Spark SQL > Py UDFs"
+     ],
+     "title": "Prune & compute"
+    },
+    {
+     "items": [
+      "Broadcast small dims",
+      "Cache & unpersist DFs"
+     ],
+     "title": "Joins & memory"
+    },
+    {
+     "items": [
+      "Avoid count()/show()",
+      "Repartition / coalesce"
+     ],
+     "title": "Actions & output"
+    }
+   ]
+  },
+  {
+   "col": "right",
+   "columns": [
+    "Symptom",
+    "Cause",
+    "Fix"
+   ],
+   "heading": "Reading the signals (CW/Spark)",
+   "rows": [
+    [
+     "Driver / Exec OOM",
+     "Small files/collect(); skew/low RAM",
+     "groupFiles/no collect(); G.2X+, salt"
+    ],
+    [
+     "1 slow task",
+     "Data skew on hot keys",
+     "Salt keys, broadcast, Spark 3 AQE"
+    ],
+    [
+     "Idle executors",
+     "Few partitions or huge GZIP file",
+     "Repartition, use splittable formats"
+    ],
+    [
+     "Reads all history",
+     "No pushdown predicate or bookmarks",
+     "Pushdown filters, enable bookmarks"
+    ],
+    [
+     "High batch cost",
+     "Over-provisioned, Standard class",
+     "Auto scaling, Flex, right-size"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Flexible start / lower cost",
+     "Flex execution class",
+     "Spare capacity at lower price"
+    ],
+    [
+     "Variable load / idle workers",
+     "Auto scaling (max workers)",
+     "Scales executors per stage"
+    ],
+    [
+     "Reads all partitions (1 day)",
+     "Pushdown predicate",
+     "Prunes partitions before reading"
+    ],
+    [
+     "Millions of tiny JSON files",
+     "groupFiles / groupSize",
+     "Fewer, larger read tasks"
+    ],
+    [
+     "Executor OOM / slow Python UDF",
+     "G.2X+ & fix skew / Spark SQL",
+     "More executor RAM; no UDF overhead"
+    ],
+    [
+     "Join big table + tiny lookup",
+     "Broadcast join",
+     "Avoids shuffling the big table"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Tuning AWS Glue Jobs for Performance and Cost"
+}

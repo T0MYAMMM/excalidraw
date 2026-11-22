@@ -1,42 +1,1874 @@
 {
  "_note": "Per-material design: the blocks (type, column, heading) each lesson uses, in stacking order. Agents fill only these blocks. Anchors on every material: concepts + tips (left), decisions (right).",
- "4": {"lesson": "dea-distributed-computing-concepts", "blocks": [
-   {"type": "concepts", "col": "left", "heading": "Core Concepts", "count": 3},
-   {"type": "tips", "col": "left"},
-   {"type": "cluster", "col": "middle", "heading": "Spark: driver and executors", "why": "show how one job is split into tasks over partitions on executors"},
-   {"type": "compare", "col": "middle", "heading": "Narrow vs wide transformations", "why": "left = narrow (no shuffle), right = wide (shuffle); points in plain words"},
-   {"type": "table", "col": "right", "heading": "Data structures to recognize", "why": "the lesson's data-structure table, 4-5 rows"},
-   {"type": "decisions", "col": "right"}
- ]},
- "5": {"lesson": "dea-kinesis-data-streams", "blocks": [
-   {"type": "callouts", "col": "left", "heading": "Shard limits", "count": 4, "why": "the key numbers: write per shard, read per shard, EFO per consumer, retention"},
-   {"type": "concepts", "col": "left", "heading": "Core Concepts", "count": 2, "why": "partition key / hot shards and producers (KPL, PutRecords)"},
-   {"type": "tips", "col": "left"},
-   {"type": "compare", "col": "middle", "heading": "Shared vs enhanced fan-out", "why": "left = shared throughput, right = enhanced fan-out"},
-   {"type": "timeline", "col": "middle", "heading": "Retention and replay", "why": "axis from record written to max retention, marks for 24 h default, 7 days, 365 days and replay positions (TRIM_HORIZON, AT_TIMESTAMP, LATEST); no lanes"},
-   {"type": "flowchart", "col": "right", "heading": "Fan-in and fan-out", "height": 170, "why": "producers -> stream -> consumers, 3 groups"},
-   {"type": "decisions", "col": "right"}
- ]},
- "6": {"lesson": "dea-amazon-data-firehose", "blocks": [
-   {"type": "concepts", "col": "left", "heading": "Core Concepts", "count": 3},
-   {"type": "tips", "col": "left"},
-   {"type": "pipeline", "col": "middle-right", "heading": "Delivery pipeline", "why": "5-6 stages left to right from source through buffering, transform, format conversion, dynamic partitioning to destinations; branch from the transform or delivery stage to the S3 error/backup prefix"},
-   {"type": "compare", "col": "middle", "heading": "Firehose vs Kinesis Data Streams", "why": "left = Firehose, right = KDS"},
-   {"type": "decisions", "col": "right"}
- ]},
- "7": {"lesson": "dea-msk-and-flink", "blocks": [
-   {"type": "concepts", "col": "left", "heading": "Core Concepts", "count": 3},
-   {"type": "tips", "col": "left"},
-   {"type": "pairs", "col": "middle", "heading": "Kafka ↔ Kinesis vocabulary", "why": "left = Kafka term, right = Kinesis equivalent"},
-   {"type": "compare", "col": "middle", "heading": "MSK Provisioned vs Serverless", "why": "left = Provisioned, right = Serverless"},
-   {"type": "timeline", "col": "right", "heading": "Flink window types", "why": "3 lanes: Tumbling (back-to-back fixed bars), Sliding (overlapping bars), Session (bars separated by gaps of inactivity); axis = event time; no marks or at most 1"},
-   {"type": "decisions", "col": "right"}
- ]},
- "8": {"lesson": "dea-stream-processing-lambda", "blocks": [
-   {"type": "concepts", "col": "left", "heading": "Core Concepts", "count": 3},
-   {"type": "tips", "col": "left"},
-   {"type": "decision_tree", "col": "middle", "heading": "When a batch fails", "why": "start: batch invoked -> decision: function error? -> no: checkpoint & next batch; yes: bisect enabled? -> split batch / retry whole batch -> decision: retries or record age left? -> retry; else -> on-failure destination, continue; 6-9 nodes"},
-   {"type": "callouts", "col": "right", "heading": "ESM knobs", "count": 4, "why": "batch size, batching window, parallelization factor, retries/age"},
-   {"type": "decisions", "col": "right"}
- ]}
+ "4": {
+  "lesson": "dea-distributed-computing-concepts",
+  "blocks": [
+   {
+    "type": "concepts",
+    "col": "left",
+    "heading": "Core Concepts",
+    "count": 3
+   },
+   {
+    "type": "tips",
+    "col": "left"
+   },
+   {
+    "type": "cluster",
+    "col": "middle",
+    "heading": "Spark: driver and executors",
+    "why": "show how one job is split into tasks over partitions on executors"
+   },
+   {
+    "type": "compare",
+    "col": "middle",
+    "heading": "Narrow vs wide transformations",
+    "why": "left = narrow (no shuffle), right = wide (shuffle); points in plain words"
+   },
+   {
+    "type": "table",
+    "col": "right",
+    "heading": "Data structures to recognize",
+    "why": "the lesson's data-structure table, 4-5 rows"
+   },
+   {
+    "type": "decisions",
+    "col": "right"
+   }
+  ]
+ },
+ "5": {
+  "lesson": "dea-kinesis-data-streams",
+  "blocks": [
+   {
+    "type": "callouts",
+    "col": "left",
+    "heading": "Shard limits",
+    "count": 4,
+    "why": "the key numbers: write per shard, read per shard, EFO per consumer, retention"
+   },
+   {
+    "type": "concepts",
+    "col": "left",
+    "heading": "Core Concepts",
+    "count": 2,
+    "why": "partition key / hot shards and producers (KPL, PutRecords)"
+   },
+   {
+    "type": "tips",
+    "col": "left"
+   },
+   {
+    "type": "compare",
+    "col": "middle",
+    "heading": "Shared vs enhanced fan-out",
+    "why": "left = shared throughput, right = enhanced fan-out"
+   },
+   {
+    "type": "timeline",
+    "col": "middle",
+    "heading": "Retention and replay",
+    "why": "axis from record written to max retention, marks for 24 h default, 7 days, 365 days and replay positions (TRIM_HORIZON, AT_TIMESTAMP, LATEST); no lanes"
+   },
+   {
+    "type": "flowchart",
+    "col": "right",
+    "heading": "Fan-in and fan-out",
+    "height": 170,
+    "why": "producers -> stream -> consumers, 3 groups"
+   },
+   {
+    "type": "decisions",
+    "col": "right"
+   }
+  ]
+ },
+ "6": {
+  "lesson": "dea-amazon-data-firehose",
+  "blocks": [
+   {
+    "type": "concepts",
+    "col": "left",
+    "heading": "Core Concepts",
+    "count": 3
+   },
+   {
+    "type": "tips",
+    "col": "left"
+   },
+   {
+    "type": "pipeline",
+    "col": "middle-right",
+    "heading": "Delivery pipeline",
+    "why": "5-6 stages left to right from source through buffering, transform, format conversion, dynamic partitioning to destinations; branch from the transform or delivery stage to the S3 error/backup prefix"
+   },
+   {
+    "type": "compare",
+    "col": "middle",
+    "heading": "Firehose vs Kinesis Data Streams",
+    "why": "left = Firehose, right = KDS"
+   },
+   {
+    "type": "decisions",
+    "col": "right"
+   }
+  ]
+ },
+ "7": {
+  "lesson": "dea-msk-and-flink",
+  "blocks": [
+   {
+    "type": "concepts",
+    "col": "left",
+    "heading": "Core Concepts",
+    "count": 3
+   },
+   {
+    "type": "tips",
+    "col": "left"
+   },
+   {
+    "type": "pairs",
+    "col": "middle",
+    "heading": "Kafka ↔ Kinesis vocabulary",
+    "why": "left = Kafka term, right = Kinesis equivalent"
+   },
+   {
+    "type": "compare",
+    "col": "middle",
+    "heading": "MSK Provisioned vs Serverless",
+    "why": "left = Provisioned, right = Serverless"
+   },
+   {
+    "type": "timeline",
+    "col": "right",
+    "heading": "Flink window types",
+    "why": "3 lanes: Tumbling (back-to-back fixed bars), Sliding (overlapping bars), Session (bars separated by gaps of inactivity); axis = event time; no marks or at most 1"
+   },
+   {
+    "type": "decisions",
+    "col": "right"
+   }
+  ]
+ },
+ "8": {
+  "lesson": "dea-stream-processing-lambda",
+  "blocks": [
+   {
+    "type": "concepts",
+    "col": "left",
+    "heading": "Core Concepts",
+    "count": 3
+   },
+   {
+    "type": "tips",
+    "col": "left"
+   },
+   {
+    "type": "decision_tree",
+    "col": "middle",
+    "heading": "When a batch fails",
+    "why": "start: batch invoked -> decision: function error? -> no: checkpoint & next batch; yes: bisect enabled? -> split batch / retry whole batch -> decision: retries or record age left? -> retry; else -> on-failure destination, continue; 6-9 nodes"
+   },
+   {
+    "type": "callouts",
+    "col": "right",
+    "heading": "ESM knobs",
+    "count": 4,
+    "why": "batch size, batching window, parallelization factor, retries/age"
+   },
+   {
+    "type": "decisions",
+    "col": "right"
+   }
+  ]
+ },
+ "9": {
+  "lesson": "dea-batch-ingestion-services",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Batch numbers & limits",
+    "type": "callouts",
+    "why": "key numbers: 100 TB @ 1 Gbps (80%) ≈ 12-13 days (Snow vs DataSync), 128 MB-1 GB target Parquet file size, 15-min Lambda batch timeout"
+   },
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "batch config (1.1.3): incremental & idempotent loads (bookmarks, CDC, MERGE); file grouping, Parquet & date partitions; triggers, JDBC parallelism & throttling; Glue/EMR/Redshift UNLOAD/Lambda"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "exam traps: Lambda+Salesforce distractor (use AppFlow); DataSync pulls vs Transfer Family external push; DataSync vs Snow; S3 Transfer Acceleration != migration; bookmarks need transformation_ctx"
+   },
+   {
+    "col": "middle",
+    "heading": "Batch ingestion services",
+    "type": "table",
+    "why": "7 rows (AppFlow, DataSync, Transfer Family, Snow, DMS, Data Exchange, S3 direct) with Service, Moves, Key feature for choosing the right batch service"
+   },
+   {
+    "col": "middle",
+    "heading": "DataSync vs Snowball Edge",
+    "type": "compare",
+    "why": "transfer-time math: left = DataSync (good bandwidth, Direct Connect, recurring syncs); right = Snowball Edge (100 TB @ 1 Gbps 80% ≈ 12-13 days, tight deadline, shared/no bandwidth)"
+   },
+   {
+    "col": "right",
+    "heading": "Batch landing architecture",
+    "height": 175,
+    "type": "flowchart",
+    "why": "sources (AppFlow/SF, DataSync/NFS, Transfer Family/SFTP, Snowball/500 TB) -> S3 raw --(event/EventBridge)--> Glue (Parquet) -> S3 curated -> Redshift COPY"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "decision guide mapping exam scenarios to AppFlow, Transfer Family, DataSync, Snowball Edge, Data Exchange, DMS, Glue job bookmarks, and file grouping/compaction"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 4,
+    "topic": "Choosing the right batch ingestion service"
+   },
+   {
+    "block": 2,
+    "topic": "Batch configuration options (skill 1.1.3)"
+   },
+   {
+    "block": 5,
+    "topic": "Rough transfer-time math"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 3,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "11": {
+  "lesson": "dea-data-apis-rate-limits",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 2,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "1) External APIs: pagination/cursors, Secrets Manager auth, idempotent writes, Lambda/Glue/AppFlow; 2) Rate limits: 429/Retry-After, exponential backoff + jitter (SDK modes), SQS buffer + max concurrency"
+   },
+   {
+    "col": "left",
+    "heading": "IP allowlists: outbound vs inbound",
+    "type": "compare",
+    "why": "left = outbound allowlists (private subnet + NAT GW Elastic IP; non-VPC Lambda has no fixed IP); right = inbound control (security groups, CIDRs/SG refs, Firehose CIDR for Redshift)"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "No immediate retry loops (use backoff+jitter); Lambda timeout != throttling fix; NAT GW outbound vs SG inbound; Secrets Manager not hard-coded keys; API GW cache can be stale"
+   },
+   {
+    "col": "middle",
+    "heading": "Throttling on AWS data services",
+    "type": "table",
+    "why": "Service | Signal | Fixes: DynamoDB (hot keys/on-demand/DAX), Kinesis (shards/keys/KPL/EFO), RDS/Aurora (RDS Proxy/replicas), Lambda (429/concurrency/SQS), AWS APIs (SDK backoff/batch/quota)"
+   },
+   {
+    "col": "middle",
+    "heading": "Creating data APIs on AWS",
+    "type": "cluster",
+    "why": "API GW + Lambda (auth, caching, token-bucket rate/burst 429), API GW direct integrations, Redshift Data API (async HTTPS/IAM), Athena API, RDS Data API (Aurora), Data Exchange for APIs"
+   },
+   {
+    "col": "right",
+    "heading": "Ingest-to-API pattern",
+    "height": 175,
+    "type": "flowchart",
+    "why": "EventBridge -> private Lambda (+ Secrets Manager, NAT EIP) -> Partner API (429 backoff+jitter) -> S3 raw -> Glue curated -> DynamoDB <- API Gateway (throttling, caching, IAM) <- Consumers"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "Scenarios -> RDS Proxy, partition key/write sharding, DynamoDB on-demand, private subnet + NAT EIP, Redshift Data API, API Gateway (+ Lambda/direct), SQS buffer + consumer concurrency"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 1,
+    "topic": "Consuming external APIs well"
+   },
+   {
+    "block": 4,
+    "topic": "Throttling on AWS data services"
+   },
+   {
+    "block": 2,
+    "topic": "IP allowlists"
+   },
+   {
+    "block": 5,
+    "topic": "Creating data APIs on AWS"
+   },
+   {
+    "block": 6,
+    "topic": "How it works / architecture patterns"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 3,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "10": {
+  "lesson": "dea-dms-migration-cdc",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "Components (endpoints, classic vs DMS Serverless, tasks/mappings), CDC log prereqs (Oracle redo/supplemental, MS-CDC, binlog ROW, PG logical), ops (VPC/VPN/DX, validation, CDCLatency, Redshift COPY)"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "DMS moves data only (not schemas/procs); CDC needs source log prereqs; zero-ETL beats DMS for supported Redshift sources; not DataSync/AppFlow; S3 target needs MERGE"
+   },
+   {
+    "col": "middle",
+    "heading": "Migration types",
+    "type": "table",
+    "why": "3 rows: Full load (one-time copy, downtime OK), CDC only (ongoing log changes, data pre-loaded), Full load + CDC (initial copy + ongoing sync, minimal downtime & lake CDC)"
+   },
+   {
+    "col": "middle",
+    "heading": "Homogeneous vs heterogeneous & schema",
+    "type": "compare",
+    "why": "left = Homogeneous (same engine, schema as-is, native tools); right = Heterogeneous & Schema Conversion (DMS Schema Conversion console + assessment report; AWS SCT desktop for DW like Teradata/Netezza -> Redshift)"
+   },
+   {
+    "col": "middle",
+    "heading": "DMS to S3 data lake pipeline",
+    "type": "pipeline",
+    "why": "Source DB -> DMS S3 target (Parquet, Op I/U/D, DatePartitionEnabled, TimestampColumnName, CdcInsertsOnly/AndUpdates, SSE-KMS) -> immutable S3 raw/cdc -> Glue/EMR/Athena MERGE -> Apache Iceberg"
+   },
+   {
+    "col": "right",
+    "heading": "Architecture & targets",
+    "height": 180,
+    "type": "flowchart",
+    "why": "Sources (on-prem Oracle/SQL Server) -> AWS DMS / Serverless (full load + CDC) -> Targets (S3 raw/cdc -> Glue MERGE -> Iceberg; alt KDS/MSK -> real-time consumers; Aurora PG via DMS Schema Conversion)"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "6 rules: Oracle->Aurora PG minimal downtime (SC/SCT+DMS), OLTP->S3 lake (Parquet+Iceberg MERGE), real-time fan-out (KDS/MSK), unpredictable load (Serverless), Aurora->Redshift (zero-ETL), Teradata DW (SCT)"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 1,
+    "topic": "Components"
+   },
+   {
+    "block": 3,
+    "topic": "Migration types"
+   },
+   {
+    "block": 4,
+    "topic": "Homogeneous vs heterogeneous migrations"
+   },
+   {
+    "block": 4,
+    "topic": "Schema conversion"
+   },
+   {
+    "block": 5,
+    "topic": "DMS to an S3 data lake"
+   },
+   {
+    "block": 6,
+    "topic": "How it works / architecture patterns"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "12": {
+  "lesson": "dea-schedulers-event-triggers",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "EB 6-field cron (m h dom mon dow yr, ?), service state-change rules & EB Pipes (SQS/Kinesis/DDB/MSK); Glue 4 trigger types; batching small files (Glue N events/T sec, S3->SQS, schedule + bookmarks)"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "S3 Notifications can't target SFN/Glue directly; EB rules=UTC vs Scheduler=TZ/one-time; no cron-Lambda S3 polling or Lambda sleep loops (use SFN .sync); S3->EB sends all events to default bus"
+   },
+   {
+    "col": "middle",
+    "heading": "Time-based schedulers",
+    "type": "table",
+    "why": "Compare EB Scheduler (TZ/DST, one-time, flexible windows, DLQ, 270+ targets), EB rules (UTC), Glue triggers/crawler schedules, MWAA (DAGs, backfills), Redshift scheduled queries"
+   },
+   {
+    "col": "middle",
+    "heading": "S3 Notifications vs S3 → EventBridge",
+    "type": "compare",
+    "why": "Left = S3 Event Notifications (per-bucket, prefix/suffix, low latency, Lambda/SQS/SNS only); Right = S3->EventBridge (default bus, rich filtering, SFN/Glue/ECS/API targets, archive & replay)"
+   },
+   {
+    "col": "middle",
+    "heading": "Job chaining options",
+    "type": "cluster",
+    "why": "3 chaining patterns: Glue conditional triggers (Glue-only), EventBridge rules on Glue Job State Change SUCCEEDED (loose coupling), Step Functions or MWAA (branching, retries, parallelism)"
+   },
+   {
+    "col": "right",
+    "heading": "File-arrival pipeline",
+    "type": "pipeline",
+    "why": "Linear flow: Upload s3://raw/orders/*.parquet -> EventBridge rule (bucket/prefix/suffix) -> Step Functions (Glue .sync, crawler, notify); error branch -> SNS on failure"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "Local time/DST->EB Scheduler; simple file trigger->S3->Lambda; rich routing/replay->S3->EB; Glue-only chain->Glue trigger; Glue fail alert->EB->SNS; backfills/Python->MWAA; daily crawl->crawler"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 3,
+    "topic": "Time-based scheduling options"
+   },
+   {
+    "block": 4,
+    "topic": "Event-based triggering"
+   },
+   {
+    "block": 6,
+    "topic": "File-arrival pipeline"
+   },
+   {
+    "block": 1,
+    "topic": "Batching many small events"
+   },
+   {
+    "block": 5,
+    "topic": "Job chaining"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "13": {
+  "lesson": "dea-glue-etl-fundamentals",
+  "blocks": [
+   {
+    "col": "left",
+    "heading": "Glue components",
+    "type": "cluster",
+    "why": "8 Glue components: Data Catalog, Crawlers, Jobs, Triggers & workflows, Connections, Glue Studio, Interactive sessions/notebooks, and Data Quality / DataBrew / Schema Registry."
+   },
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "Job bookmarks (S3/JDBC state, enable flag, transformation_ctx, init/commit); multi-source ETL (join JDBC+S3, Glue Studio -> Parquet/Iceberg); streaming ETL (Kinesis/MSK micro-batches; Flink for sub-sec/stateful)."
+   },
+   {
+    "col": "left",
+    "heading": "Exam tips & traps",
+    "type": "tips",
+    "why": "Reprocessing -> missing transformation_ctx or job.commit(); VPC timeout -> missing S3 endpoint or self-ref SG; Python shell not for TB; creds in Secrets Manager; Spark startup -> Lambda for tiny tasks."
+   },
+   {
+    "col": "middle",
+    "heading": "Job types",
+    "type": "table",
+    "why": "Job type | Engine | Best for: Spark (batch ETL/joins), Spark Streaming (Kinesis/MSK micro-batches), Python shell (APIs/SQL), Ray (distributed pandas). Note: 1 DPU = 4 vCPU, 16 GB RAM."
+   },
+   {
+    "col": "middle",
+    "heading": "DynamicFrame vs DataFrame",
+    "type": "compare",
+    "why": "Left = DynamicFrame (self-describing, choice types, ResolveChoice, ApplyMapping, Relationalize, DropNullFields); right = DataFrame (fixed schema, Spark SQL/joins); convert via toDF()/fromDF()."
+   },
+   {
+    "col": "right",
+    "heading": "Private VPC & JDBC access",
+    "height": 170,
+    "type": "flowchart",
+    "why": "VPC private subnet: Glue ENIs (self-referencing SG) -> RDS/Aurora via JDBC (DX/VPN on-prem) & S3 gateway endpoint -> S3 lake; side links to Secrets Manager and Glue Data Catalog."
+   },
+   {
+    "col": "right",
+    "heading": "Decision guide",
+    "type": "decisions",
+    "why": "Decision guide: serverless Spark, Python shell vs Lambda, bookmarks, ResolveChoice, VPC SG+S3 endpoint, Glue Studio/DataBrew, streaming job, Relationalize for nested JSON."
+   }
+  ],
+  "coverage": [
+   {
+    "block": 1,
+    "topic": "Glue components at a glance"
+   },
+   {
+    "block": 4,
+    "topic": "Job types"
+   },
+   {
+    "block": 5,
+    "topic": "DynamicFrame vs DataFrame"
+   },
+   {
+    "block": 2,
+    "topic": "Job bookmarks"
+   },
+   {
+    "block": 6,
+    "topic": "Reaching private data sources (JDBC/ODBC)"
+   },
+   {
+    "block": 2,
+    "topic": "Integrating multiple sources"
+   },
+   {
+    "block": 2,
+    "topic": "Streaming ETL"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 3,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "14": {
+  "lesson": "dea-glue-performance-cost",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Key numbers & thresholds",
+    "type": "callouts",
+    "why": "1 DPU = 4 vCPU / 16 GB RAM; >50,000 S3 files auto-enables groupFiles (~128 MB); 128 MB-1 GB target output file size"
+   },
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "1) Reading less: pushdown predicates + partition indexes, Parquet/ORC, job bookmarks; 2) Small files: groupFiles input, coalesce/repartition output; 3) Reliability: timeout, max retries, max concurrency"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "Adding workers won't fix skew/driver OOM; .filter() isn't partition pruning; GZIP CSV/JSON is non-splittable; Flex not for SLA; Python shell cheapest for small jobs"
+   },
+   {
+    "col": "middle",
+    "heading": "Worker types & auto scaling",
+    "type": "table",
+    "why": "Worker | Size | Use for: G.025X (0.25, streaming), G.1X (1, batch), G.2X (2, memory/ML), G.4X/G.8X (4/8, heavy). Note Auto scaling (Glue 3.0+, max workers, scales per stage)"
+   },
+   {
+    "col": "middle",
+    "heading": "Standard vs Flex execution",
+    "type": "compare",
+    "why": "Left = Standard (dedicated capacity, predictable timing, SLA/dashboards); Right = Flex (spare capacity, lower cost, variable start/runtime, backfills/test/non-urgent)"
+   },
+   {
+    "col": "middle",
+    "heading": "Code-level optimization",
+    "type": "cluster",
+    "why": "Filter/select early; native Spark SQL over Python UDFs; broadcast joins for small dims; cache/unpersist reused DFs; avoid count()/show(); repartition joins, coalesce writes"
+   },
+   {
+    "col": "right",
+    "heading": "Reading the signals (CW & Spark UI)",
+    "type": "table",
+    "why": "CW job metrics & Spark UI: Symptom | Cause | Fix for Driver OOM, Executor OOM, 1 slow task (skew/AQE), idle executors (GZIP), reads all history, high nightly batch cost"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "Scenario->choice: flexible start->Flex; variable load->Auto scaling; reads all partitions->pushdown; tiny files->groupFiles; executor OOM->G.2X+/skew; slow UDF->native Spark; big+tiny join->broadcast"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 4,
+    "topic": "Capacity: DPUs, worker types and auto scaling"
+   },
+   {
+    "block": 5,
+    "topic": "Flex execution class"
+   },
+   {
+    "block": 2,
+    "topic": "Reading less data"
+   },
+   {
+    "block": 2,
+    "topic": "The small-files problem"
+   },
+   {
+    "block": 7,
+    "topic": "Reading the signals"
+   },
+   {
+    "block": 6,
+    "topic": "Code-level optimization"
+   },
+   {
+    "block": 2,
+    "topic": "Reliability settings"
+   },
+   {
+    "block": 8,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 3,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "15": {
+  "lesson": "dea-emr-processing",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "3 cards: (1) EC2 nodes (Primary, Core=HDFS/OD, Task=Spot; fleets vs groups), (2) Transient vs long-running (managed scaling, auto-termination), (3) Tooling (bootstrap, steps, EMR Studio, S3 log URI)"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "Exam traps: no Spot on core nodes (HDFS loss), HDFS ephemeral -> S3, Glue/Serverless for least ops, S3 log URI to debug terminated clusters, Glue Catalog as Hive metastore, TB-scale logs -> EMR"
+   },
+   {
+    "col": "middle",
+    "heading": "Deployment options",
+    "type": "table",
+    "why": "3 rows (EMR on EC2, EMR Serverless, EMR on EKS) with columns: What you manage, Best for (full control/frameworks vs clusterless Spark/Hive vs Kubernetes)"
+   },
+   {
+    "col": "middle",
+    "heading": "HDFS vs EMRFS (S3)",
+    "type": "compare",
+    "why": "left = HDFS (ephemeral, local disks, scratch/HBase); right = EMRFS on S3 (persistent, scalable data lake, decouples storage from compute for transient clusters)"
+   },
+   {
+    "col": "middle",
+    "heading": "Big data frameworks",
+    "type": "cluster",
+    "why": "EMR frameworks: Spark, Hive (Glue Catalog metastore), Presto/Trino, HBase, Flink, Hudi/Iceberg/Delta Lake, JupyterHub & Livy"
+   },
+   {
+    "col": "right",
+    "heading": "Transient batch ETL pattern",
+    "type": "pipeline",
+    "why": "Step Functions/MWAA -> Transient EMR (OD core, Spot task fleets) reads S3 raw -> writes S3 curated Parquet/Iceberg + Glue Catalog -> terminate; branch: S3 log URI; note EMR Serverless alternative"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "Decision guide: Glue vs EMR Serverless vs EMR on EC2 (frameworks or Spot task fleets) vs EMR on EKS; transient/auto-termination for idle; managed scaling for variable load; EMRFS/S3 for persistence"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 3,
+    "topic": "Deployment options"
+   },
+   {
+    "block": 1,
+    "topic": "EMR on EC2 node types"
+   },
+   {
+    "block": 4,
+    "topic": "Storage: HDFS vs EMRFS (S3)"
+   },
+   {
+    "block": 1,
+    "topic": "Transient vs long-running clusters"
+   },
+   {
+    "block": 5,
+    "topic": "Applications"
+   },
+   {
+    "block": 1,
+    "topic": "Tooling"
+   },
+   {
+    "block": 6,
+    "topic": "How it works / architecture patterns"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "16": {
+  "lesson": "dea-choosing-transformation-compute",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 2,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "Containers (1.2.1): (1) Fargate vs EC2, right-size via Container Insights, Spot capacity; (2) slim ECR images + scan, auto-scale (ECS SQS depth, EKS HPA + Karpenter/CA), Batch for queued/dependent jobs."
+   },
+   {
+    "col": "left",
+    "heading": "Cost levers (skill 1.2.4)",
+    "type": "pairs",
+    "why": "5 cost levers (1.2.4): less data <-> pruning/columnar/pushdown; cheaper <-> Flex/Spot/Graviton; scale <-> Glue/EMR scaling & transient; avoid idle <-> serverless; SQL <-> Redshift ELT / Athena CTAS."
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "Lambda trap (>15 min or big joins -> Glue/EMR); EMR beats Glue for HBase/Trino/Flink, custom AMIs, or heavy Spot; containers = Fargate or EC2 capacity providers; never self-manage Spark on raw EC2."
+   },
+   {
+    "col": "middle",
+    "heading": "Choosing compute",
+    "type": "decision_tree",
+    "why": "Workload? -> MBs: Lambda; in Redshift: Redshift ELT; container: ECS/EKS or Batch; GBs-TBs -> need control/Spot/HBase/Trino/Flink? No: Glue; Yes -> manage clusters? Yes: EMR EC2; No: EMR Serverless."
+   },
+   {
+    "col": "right",
+    "heading": "Compute candidates",
+    "type": "cluster",
+    "why": "9 candidates in 4 groups: Spark (Glue DPU-s/Flex, EMR EC2/Serverless/EKS); Event (Lambda 15m/10GB RAM & /tmp); SQL ELT (Redshift DW SQL, Athena CTAS/TB); Containers (ECS/EKS Fargate/EC2, AWS Batch queues)."
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "Map scenarios -> Glue (least overhead), EMR EC2 (Spot/custom), EMR Serverless, EMR on EKS (K8s), Lambda (small JSON), Redshift SQL/MVs (ELT), Batch (queued/dependent jobs), Glue Flex (non-urgent nightly)."
+   }
+  ],
+  "coverage": [
+   {
+    "block": 5,
+    "topic": "The candidates"
+   },
+   {
+    "block": 1,
+    "topic": "Optimizing containers (skill 1.2.1)"
+   },
+   {
+    "block": 2,
+    "topic": "Cost levers when processing (skill 1.2.4)"
+   },
+   {
+    "block": 4,
+    "topic": "How it works / architecture patterns"
+   },
+   {
+    "block": 6,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 3,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "17": {
+  "lesson": "dea-file-formats-conversion",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "Columnar speedups (pruning, predicate pushdown, dictionary/RLE); splittability (row-group vs single .csv.gz); file sizing (128 MB-1 GB target, compact via Glue/CTAS/Iceberg/Firehose buffers)"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "Parquet/ORC+Snappy/ZSTD+partitioning default; GZIP CSV kills splitting & skips no columns; Avro is row-based for streaming; Firehose needs JSON+Glue schema; balance partitions vs tiny files"
+   },
+   {
+    "col": "middle",
+    "heading": "Row vs columnar formats",
+    "type": "compare",
+    "why": "left = Row (CSV/TSV text, JSON nested, Avro binary + schema evolution for Kafka/streaming); right = Columnar (Parquet for Athena/Spectrum/Spark/Glue, ORC for Hive; pruning, pushdown, compression)"
+   },
+   {
+    "col": "middle",
+    "heading": "Compression codecs",
+    "type": "table",
+    "why": "Codec | Splittable? | Notes: Snappy (Yes in Parquet/ORC, Spark default), ZSTD (Yes, ratio/speed), GZIP (No plain text, .csv.gz bottleneck), bzip2 (Yes, slow), LZO/LZ4 (fast, LZO indexed)"
+   },
+   {
+    "col": "middle",
+    "heading": "Ways to convert CSV to Parquet",
+    "type": "cluster",
+    "why": "5 ways: Glue job (DynamicFrame, partitioned Parquet), Athena CTAS (serverless SQL), Firehose (JSON->Parquet/ORC via Glue schema; CSV needs Lambda), EMR/Serverless Spark (large/custom), DMS (DB->Parquet S3)"
+   },
+   {
+    "col": "right",
+    "heading": "Troubleshooting failures (1.2.7)",
+    "type": "pairs",
+    "why": "Symptom <-> Fix: HIVE_BAD_DATA <-> OpenCSVSerDe/route bad; Glue choice <-> ResolveChoice; schema mismatch <-> update catalog; OOM <-> repartition/salt/split; small files <-> compact; timestamps <-> UTC/ISO-8601"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "6 rows: Athena CSV cost -> Parquet/ORC+compress+partition; Kafka evolving schema -> Avro; slow .csv.gz -> split/Parquet; no-code JSON stream -> Firehose; one-time SQL -> CTAS; Redshift nested JSON -> SUPER/Glue"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 3,
+    "topic": "Row vs columnar formats"
+   },
+   {
+    "block": 4,
+    "topic": "Compression codecs"
+   },
+   {
+    "block": 1,
+    "topic": "File sizing"
+   },
+   {
+    "block": 5,
+    "topic": "Ways to convert CSV to Parquet"
+   },
+   {
+    "block": 6,
+    "topic": "Troubleshooting common transformation failures (skill 1.2.7)"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "18": {
+  "lesson": "dea-llm-data-processing",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "Engineering concerns: (1) Quotas/cost: backoff, concurrency/batch, lean prompts, cache, incremental; (2) Validation/lineage: JSON + Glue DQ, model/prompt version; (3) Security: PrivateLink, IAM, KMS, PII."
+   },
+   {
+    "col": "left",
+    "heading": "Exam tips & traps",
+    "type": "tips",
+    "why": "Managed Bedrock over training/fine-tuning or EC2 GPU distractors; always validate output before trusted tables; handle throttling via backoff/concurrency/batch; protect PII with VPC endpoints, IAM, masking."
+   },
+   {
+    "col": "middle",
+    "heading": "Bedrock in a data pipeline",
+    "type": "cluster",
+    "why": "Bedrock pieces: InvokeModel/Converse (sync APIs), Batch inference (async S3 JSONL), Step Functions native integration (+ Distributed Map), Knowledge bases (managed RAG), Guardrails (content & PII filter)."
+   },
+   {
+    "col": "middle",
+    "heading": "What LLMs do well",
+    "type": "table",
+    "why": "2-col table (Task | Example): Extraction, Classification, Normalization, Summarization, Enrichment, Embeddings. Note: Amazon Q assists engineers with generative SQL and ETL/notebook code (SageMaker Unified Studio)."
+   },
+   {
+    "col": "middle",
+    "heading": "Near-real-time enrichment",
+    "type": "pipeline",
+    "why": "S3 (new tickets) -> EventBridge -> Step Functions -> Bedrock InvokeModel (classify/extract JSON) -> Lambda (validate schema) -> DynamoDB/S3 curated; invalid branch -> SQS review queue."
+   },
+   {
+    "col": "right",
+    "heading": "Large backfill (batch)",
+    "type": "pipeline",
+    "why": "3-step batch flow: Glue writes JSONL prompts (with recordId) to S3 -> Bedrock batch inference job (S3 in/out) -> EventBridge/Step Functions triggers Glue to join by ID, validate, write Parquet."
+   },
+   {
+    "col": "right",
+    "heading": "Decision guide",
+    "type": "decisions",
+    "why": "Scenarios: bulk/cheap -> Bedrock batch; seconds -> on-demand; 1000s S3 -> SF Distributed Map; doc Q&A -> Knowledge base; enterprise search -> Kendra; NL-to-SQL -> Amazon Q; PII -> Guardrails + masking."
+   }
+  ],
+  "coverage": [
+   {
+    "block": 3,
+    "topic": "Amazon Bedrock in a data pipeline"
+   },
+   {
+    "block": 4,
+    "topic": "What LLMs do well in pipelines"
+   },
+   {
+    "block": 1,
+    "topic": "Engineering concerns"
+   },
+   {
+    "block": 5,
+    "topic": "Near-real-time enrichment"
+   },
+   {
+    "block": 6,
+    "topic": "Large backfill"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "19": {
+  "lesson": "dea-step-functions",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 4,
+    "heading": "Key limits & scale",
+    "type": "callouts",
+    "why": "Key limits: 1 yr Standard max, 5 min Express max, 10,000 Distributed Map parallel child executions, 90-day Standard visual history (200+ AWS service integrations)"
+   },
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "ASL states (Task, Choice, Parallel, Map, Wait, Pass/Succeed/Fail); Distributed Map (S3 list/CSV/JSON/manifest, 10k child runs, batching); Serverless workflows (EventBridge/API GW, SAM/CDK, $0 idle)"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "No Lambda polling (use .sync); Express <=5 min, no .sync/callbacks; Standard bills per transition (avoid Wait loops); use Retry/Catch; check Standard execution history; IAM role needs all called actions"
+   },
+   {
+    "col": "middle",
+    "heading": "Standard vs Express workflows",
+    "type": "compare",
+    "why": "left = Standard (1 yr, exactly-once, per state transition, 90d visual history, ETL/.sync/callbacks); right = Express (5 min, at-least/at-most-once, per request+duration, CloudWatch Logs, high-volume events)"
+   },
+   {
+    "col": "middle",
+    "heading": "Service integration patterns",
+    "type": "table",
+    "why": "3 rows (Pattern | Behavior | Use): Request-Response (fire-and-forget); .sync (waits for Glue/EMR/Athena/Batch/ECS/SageMaker, no polling); .waitForTaskToken (pauses for SendTaskSuccess/Failure, human/SQS/external)"
+   },
+   {
+    "col": "right",
+    "heading": "ETL pipeline & error handling",
+    "type": "pipeline",
+    "why": "Flow: EventBridge -> SFN Standard -> Glue .sync -> Parallel (Crawler + Athena DQ .sync) -> Choice -> Redshift MV. Error branch: Retry (backoff/jitter, Timeout/Heartbeat) + Catch on fail/DQ -> SNS alert"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "Standard (serverless Glue/Lambda/Athena), .sync (wait for Glue/EMR), .waitForTaskToken (human/external), Distributed Map (millions of S3 objects), Express (<5 min high-volume), MWAA (Airflow DAGs), Glue workflows"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 4,
+    "topic": "Standard vs Express workflows"
+   },
+   {
+    "block": 5,
+    "topic": "Service integration patterns"
+   },
+   {
+    "block": 6,
+    "topic": "Error handling"
+   },
+   {
+    "block": 2,
+    "topic": "Distributed Map for big S3 datasets"
+   },
+   {
+    "block": 2,
+    "topic": "Serverless workflows"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 3,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "20": {
+  "lesson": "dea-mwaa-airflow",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "Airflow vocabulary (DAG, Task, Operator, Sensor, Schedule, XCom, backfill/catchup, Amazon provider), Celery/scheduler/UI roles, and typical multi-system & lift-and-shift uses"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "Not serverless (always billing); DAGs in S3 not Git; DAG processing vs task logs; XCom metadata only; private VPC has no PyPI (use S3 wheels); acyclic DAGs & task retries"
+   },
+   {
+    "col": "middle",
+    "heading": "Example DAG flow",
+    "type": "pipeline",
+    "why": "DAG flow: S3KeySensor (mode='reschedule') -> GlueJobOperator (ETL) -> RedshiftDataOperator (refresh MV), with retry/task-log branch"
+   },
+   {
+    "col": "middle",
+    "heading": "Troubleshooting MWAA (3.1.2)",
+    "type": "table",
+    "why": "3 cols (Symptom | Cause | Fix): missing DAG (DAG processing logs), requirements.txt (constraints/plugins.zip), AccessDenied (role), queued (workers/QueuedTasks), VPC/SG, poke->reschedule"
+   },
+   {
+    "col": "right",
+    "heading": "MWAA architecture",
+    "height": 175,
+    "type": "flowchart",
+    "why": "3 groups: S3 (dags/, requirements.txt, plugins.zip, startup) + Secrets Manager -> MWAA in VPC (2 private AZs, mw1.*, auto-scaling workers, exec role) -> AWS targets + CloudWatch Logs"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "6 rules: existing Airflow or complex multi-system DAGs -> MWAA; serverless AWS-only -> Step Functions; Glue sequence -> Glue workflows; hourly -> EventBridge; S3 wait -> S3KeySensor or EventBridge"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 1,
+    "topic": "Airflow vocabulary"
+   },
+   {
+    "block": 5,
+    "topic": "MWAA architecture"
+   },
+   {
+    "block": 4,
+    "topic": "Troubleshooting MWAA (skill 3.1.2)"
+   },
+   {
+    "block": 6,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "21": {
+  "lesson": "dea-orchestration-choices",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "Glue workflows (Glue-only DAGs, 4 trigger types, run properties, blueprints), EventBridge (Rules, Scheduler, Pipes), Lambda anti-pattern (no chaining/waiting, 15-min limit)"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "Glue cannot call non-Glue; Step Functions < MWAA ops overhead; avoid EC2 cron; S3 cannot trigger Glue directly; event-driven needs idempotency"
+   },
+   {
+    "col": "middle",
+    "heading": "Orchestration vs choreography",
+    "type": "compare",
+    "why": "left = Orchestration (central controller, visible, retries: Step Functions/MWAA/Glue); right = Choreography (event-driven EventBridge rules, loosely coupled, harder to trace)"
+   },
+   {
+    "col": "middle",
+    "heading": "Schedule vs event-driven",
+    "type": "compare",
+    "why": "left = Schedule-driven (cron/rate via Scheduler/Glue/Airflow; simple, may run empty); right = Event-driven (S3/streams/state change; fresh, needs idempotency & burst handling)"
+   },
+   {
+    "col": "middle",
+    "heading": "Orchestrator comparison",
+    "type": "table",
+    "why": "Glue workflows, Step Functions, MWAA, EventBridge across 3 columns: Serverless, Scope/Control (Glue-only vs 200+ services vs Airflow vs routing), Best for"
+   },
+   {
+    "col": "right",
+    "heading": "Orchestration & choreography patterns",
+    "height": 175,
+    "type": "flowchart",
+    "why": "2 flows: (1) S3 PUT -> EB rule -> Glue workflow (batch 100) -> Job -> Crawler + FAILED->EB->SNS; (2) EB Scheduler -> Step Functions -> Glue/Athena .sync -> Redshift Data API"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "7 scenario rules: Glue-only, S3 file trigger, batch N S3 events, multi-service serverless (Step Functions), Airflow (MWAA), 15-min schedule (Scheduler), Glue failure alert (EB->SNS)"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 3,
+    "topic": "Orchestration vs choreography"
+   },
+   {
+    "block": 4,
+    "topic": "Schedule-driven vs event-driven"
+   },
+   {
+    "block": 1,
+    "topic": "AWS Glue workflows"
+   },
+   {
+    "block": 1,
+    "topic": "EventBridge"
+   },
+   {
+    "block": 1,
+    "topic": "Lambda as an orchestrator (anti-pattern)"
+   },
+   {
+    "block": 6,
+    "topic": "How it works / architecture patterns"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "22": {
+  "lesson": "dea-resilient-pipelines-alerts",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "1) Retries w/ exp backoff + jitter (SDKs, SFN Retry, Glue MaxRetries, Lambda); 2) Idempotency (S3 overwrite, MERGE, DDB conditional, bookmarks); 3) SQS decoupling (14d buffer, visibility timeout, redrive -> DLQ)"
+   },
+   {
+    "col": "left",
+    "heading": "Alerts with SNS",
+    "type": "cluster",
+    "why": "SNS pub/sub fan-out (SNS -> SQS queues, email/Lambda) & 3 alert sources: CloudWatch alarms (Glue/Lambda/IteratorAge/DLQ depth), EventBridge rules (Glue/SFN/EMR/DataBrew FAILED), SFN Catch -> SNS"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "SNS push (no retention) vs SQS pull (durable); visibility timeout < processing time = duplicates; monitor DLQ w/ CW alarm; FIFO only when ordering needed (lower throughput); cap retries -> DLQ/alert"
+   },
+   {
+    "col": "middle",
+    "heading": "The five qualities",
+    "type": "table",
+    "why": "5 rows (Quality | Meaning | AWS techniques): Performance, Availability (Multi-AZ), Scalability (serverless/auto scaling), Resiliency (retries/checkpoints), Fault tolerance (buffers/DLQs/raw S3 replay)"
+   },
+   {
+    "col": "middle",
+    "heading": "Dead-letter destinations",
+    "type": "pairs",
+    "why": "6 service <-> failure capture pairs: SQS -> redrive DLQ; Lambda async -> on-failure dest/DLQ; Lambda ESM -> ESM dest; EventBridge -> retry + SQS DLQ; SNS sub -> redrive DLQ; Firehose -> S3 error prefix"
+   },
+   {
+    "col": "right",
+    "heading": "Resilient pipeline & alerting",
+    "type": "pipeline",
+    "why": "S3 raw -> SQS -> Lambda -> S3 curated (overwrite); error branch: SQS -> DLQ -> CW alarm -> SNS (Email/Chat) + Glue FAILED -> EventBridge -> SNS; note replay raw S3, checkpoints, timeouts, Multi-AZ, EMR Core OD"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "6 scenario -> choice rows: Glue fail email -> EB+SNS; 3 consumers -> SNS->SQS fan-out; bursts -> SQS; poison msgs -> DLQ; dupes on rerun -> idempotent/bookmarks; stream lag -> CW IteratorAgeMilliseconds->SNS"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 4,
+    "topic": "The five qualities"
+   },
+   {
+    "block": 1,
+    "topic": "Retries with exponential backoff and jitter"
+   },
+   {
+    "block": 1,
+    "topic": "Idempotency"
+   },
+   {
+    "block": 1,
+    "topic": "Decoupling with SQS"
+   },
+   {
+    "block": 5,
+    "topic": "Dead-letter destinations by service"
+   },
+   {
+    "block": 2,
+    "topic": "Alerts with SNS"
+   },
+   {
+    "block": 6,
+    "topic": "How it works / architecture patterns"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 3,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "23": {
+  "lesson": "dea-lambda-data-engineering",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 4,
+    "heading": "Lambda limits",
+    "type": "callouts",
+    "why": "15 min timeout; 128 MB–10,240 MB RAM (CPU scales to 6 vCPUs); /tmp 512 MB–10 GB & 10 GB container image (50/250 MB zip, 5 layers, 6 MB sync); 1,000 default concurrency/Region"
+   },
+   {
+    "col": "left",
+    "count": 2,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "1) Concurrency: req/s×duration, unreserved pool, 429 vs 6h async retry, SQS max, shards×parallelization. 2) When NOT to use: >15 min, >10 GB RAM/GPUs, TB joins, steady load, sync chaining (Step Functions)"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "Set memory not CPU; EFS needs VPC (+ endpoints/NAT for AWS APIs); reserved guarantees+caps vs provisioned cold starts; DLQ/dest is async only (streams use ESM); heavy libs in layers/images"
+   },
+   {
+    "col": "middle",
+    "heading": "Reserved vs provisioned concurrency",
+    "type": "compare",
+    "why": "left = Reserved (guarantees & caps at N to protect DBs; 0 pauses); right = Provisioned (pre-initialized environments remove cold starts; billed while configured; latency-sensitive APIs, rarely batch ETL)"
+   },
+   {
+    "col": "middle",
+    "heading": "Storage options inside Lambda",
+    "type": "table",
+    "why": "4 rows (/tmp up to 10 GB, EFS mount, S3, Layers/container image) with Persistence & Use for; note EFS needs VPC subnets, NFS TCP 2049 SG, access point, IAM ClientMount/ClientWrite, /mnt/ path"
+   },
+   {
+    "col": "right",
+    "heading": "Automation patterns",
+    "type": "cluster",
+    "why": "5 patterns: S3 CSV->Parquet (pyarrow -> curated S3 + DDB, <= few hundred MB), Glue/Athena/Redshift Data API kick-offs, Stream consumers (Kinesis/DDB/MSK ESM), Firehose enrichment, Athena federated connectors"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "8 scenarios: RDS spike->reserved cap; critical scale->reserved; cold starts->provisioned; 3 GB shared ref->EFS; 4 GB temp unzip->/tmp; CPU-bound->memory; big deps->10 GB container; 40m job->Glue/ECS/Batch"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 1,
+    "topic": "Limits worth memorizing"
+   },
+   {
+    "block": 4,
+    "topic": "Concurrency"
+   },
+   {
+    "block": 5,
+    "topic": "Storage options inside Lambda"
+   },
+   {
+    "block": 6,
+    "topic": "Automating data processing with Lambda"
+   },
+   {
+    "block": 2,
+    "topic": "When NOT to use Lambda"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 3,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "24": {
+  "lesson": "dea-iac-sam-cdk",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "CloudFormation engine (YAML/JSON templates, stacks, rollback, nested stacks), safety & scale (change sets, StackSets, drift, DeletionPolicy Retain/Snapshot), and parameterized data-platform IaC"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "SAM/CDK compile to CloudFormation; never recreate manually; sam package/deploy needs S3 artifact bucket & CodeUri; use Parameters/pseudo-params/Secrets Manager; Cloud9 & CodeCommit out of scope"
+   },
+   {
+    "col": "middle",
+    "heading": "AWS CDK vs AWS SAM",
+    "type": "compare",
+    "why": "left = CDK (TS/Python/Java/C#/Go; L1 Cfn*, L2 defaults/grantRead, L3 patterns; cdk synth/diff/deploy); right = SAM (CFN Transform; Function, StateMachine, SimpleTable, policy templates; sam CLI)"
+   },
+   {
+    "col": "middle",
+    "heading": "Serverless SAM pipeline & deploy",
+    "type": "pipeline",
+    "why": "Parameterized SAM template (Env=dev|prod) -> sam build/package to S3 -> CFN stack (S3 RawBucket Retain + EventBridge -> Step Functions -> Lambda + DynamoDB) across dev/prod; error branch: rollback"
+   },
+   {
+    "col": "right",
+    "heading": "Key CLI & CFN operations",
+    "type": "pairs",
+    "why": "Change sets/cdk diff <-> preview replace vs modify; StackSets <-> multi-account/Region; Drift <-> manual changes; sam package <-> S3 upload & CodeUri; sam local/sync <-> dev test; cdk synth <-> CFN"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "Decision guide: serverless Lambda+SFN+DDB -> SAM; Python reusable constructs -> CDK; 50 accounts/3 Regions -> StackSets; preview update -> Change sets/cdk diff; manual changes -> Drift; keep S3 -> Retain"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 1,
+    "topic": "AWS CloudFormation"
+   },
+   {
+    "block": 3,
+    "topic": "AWS CDK"
+   },
+   {
+    "block": 3,
+    "topic": "AWS SAM"
+   },
+   {
+    "block": 4,
+    "topic": "How it works / architecture patterns"
+   },
+   {
+    "block": 6,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "25": {
+  "lesson": "dea-cicd-engineering-practices",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "Git (commands, PR flow, CodeConnections); Code optimization (filter early, built-in Spark vs UDFs, broadcast joins, cache, SQL/Lambda); Logging & monitoring (JSON logs, correlation IDs, metrics, SLA alarms)"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "No console edits in prod; CodeCommit/Cloud9 out of scope (use CodeConnections); CodeBuild vs CodePipeline vs CodeDeploy; git pull=fetch+merge, no rebase on shared branches; promote same artifact across accounts"
+   },
+   {
+    "col": "middle",
+    "heading": "AWS developer tools",
+    "type": "cluster",
+    "why": "AWS CI/CD services: CodeConnections (GitHub/GitLab/Bitbucket), CodePipeline (orchestration + approvals), CodeBuild (buildspec.yml tests/package), CodeDeploy (Lambda canary/linear, ECS blue/green), CFN/CDK/SAM"
+   },
+   {
+    "col": "middle",
+    "heading": "Testing data pipelines",
+    "type": "table",
+    "why": "5 test types (checks + tool): Unit (pytest + Glue Docker/Spark), Schema/contract (columns/types), Data quality (Glue DQDL), Integration (Step Functions + S3 in dev), IaC (cfn-lint, cdk synth, Access Analyzer)"
+   },
+   {
+    "col": "middle",
+    "heading": "Choosing languages",
+    "type": "pairs",
+    "why": "Language <-> use: SQL (Redshift/Athena/DQ), Python/PySpark (Glue/EMR/Lambda/Airflow/boto3), Scala/Java (Spark/Flink/Kafka), R (stats/SageMaker), Bash/PowerShell (scripting/bootstrap/CLI)"
+   },
+   {
+    "col": "right",
+    "heading": "CI/CD pipeline flow",
+    "type": "pipeline",
+    "why": "Feature branch -> PR/review -> CodeConnections -> CodeBuild (buildspec.yml: pytest, cfn-lint, sam build/package) -> Dev deploy + integration/DQ tests -> Manual approval -> Prod CFN deploy; fail/rollback branch"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "5 scenarios: managed CI/CD -> CodePipeline+CodeBuild+CFN/SAM/CDK; Lambda traffic shift -> CodeDeploy canary/linear; track Glue/DAGs -> Git+PRs; slow Python UDFs -> built-in Spark; local tests -> Glue Docker+pytest"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 1,
+    "topic": "Version control with Git"
+   },
+   {
+    "block": 3,
+    "topic": "AWS developer tools"
+   },
+   {
+    "block": 4,
+    "topic": "Testing data pipelines"
+   },
+   {
+    "block": 1,
+    "topic": "Logging and monitoring as practices"
+   },
+   {
+    "block": 5,
+    "topic": "Choosing languages"
+   },
+   {
+    "block": 1,
+    "topic": "Optimizing code to reduce runtime (skill 1.4.1)"
+   },
+   {
+    "block": 6,
+    "topic": "How it works / architecture patterns"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "26": {
+  "lesson": "dea-cloudwatch-monitoring",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "Logs (groups/streams, retention, KMS, agent, Glue/Lambda/MWAA paths), Filters & exports (metric/subscription filters, S3, Logs Insights), Alarms (states, math/anomaly, composite -> SNS; EventBridge for events)"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "Retention defaults to never expire; alarms=metrics vs EventBridge=events; metric filters don't backfill; subscription filters -> Firehose for S3; CloudTrail=API calls vs CloudWatch=system behavior"
+   },
+   {
+    "col": "middle",
+    "heading": "Key pipeline metrics",
+    "type": "table",
+    "why": "3-col table (Service | Key metrics | Reveals) for Kinesis, Lambda, Firehose, Glue, SQS, DynamoDB, Redshift, Step Functions; note custom metrics via PutMetricData or EMF"
+   },
+   {
+    "col": "middle",
+    "heading": "Logging & alerting as code",
+    "type": "pipeline",
+    "why": "IaC flow: LogGroup (retention + KMS) -> MetricFilter (JSON pattern) -> Alarm (threshold) -> SNS OpsTopic; side branch: AWS Config rule + auto-remediation enforcing retention across accounts"
+   },
+   {
+    "col": "right",
+    "heading": "Central observability",
+    "height": 175,
+    "type": "flowchart",
+    "why": "Account A/B log groups --subscription filter--> Central Firehose --> S3 (Athena) & OpenSearch; Alarms -> SNS; cross-account Dashboards / Managed Grafana"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "Scenario-to-choice guide: lag -> IteratorAge alarm; log alert -> metric filter+alarm; OpenSearch -> subscription filter; Glue fail -> EventBridge; cost/KMS -> log group IaC; EC2/EMR -> CW agent"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 3,
+    "topic": "Metrics"
+   },
+   {
+    "block": 1,
+    "topic": "Alarms and notifications"
+   },
+   {
+    "block": 1,
+    "topic": "CloudWatch Logs"
+   },
+   {
+    "block": 4,
+    "topic": "Configuration and automation"
+   },
+   {
+    "block": 5,
+    "topic": "Central observability"
+   },
+   {
+    "block": 6,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "27": {
+  "lesson": "dea-pipeline-troubleshooting",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 2,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "Glue CW/Spark UI logs + EMR S3 logs (~5m delay, On-Demand core/Spot task); boto3 SDK calls (start_job_run, start_query_execution, IAM role creds, auto retries/backoff, paginators, waiters)"
+   },
+   {
+    "col": "left",
+    "heading": "MWAA symptom -> fix",
+    "type": "pairs",
+    "why": "4 MWAA pairs: missing DAG <-> DAG processing logs / S3 prefix; requirements.txt <-> pin Airflow constraints + local runner; AccessDenied <-> execution role; private VPC/queued <-> endpoints or NAT / max workers"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "Fix data layout before bigger workers; Glue VPC needs self-referencing SG rule + S3 gateway endpoint; MWAA execution role vs DAG parse logs; EMR S3 logs need log URI and arrive with ~5m delay"
+   },
+   {
+    "col": "middle",
+    "heading": "Glue & EMR failure triage",
+    "type": "table",
+    "why": "Symptom | Cause | Fix for Glue (driver/executor OOM, skew, small files, VPC/SG/S3 endpoint, KMS/LF AccessDenied, bookmarks, max concurrency) and EMR (YARN memoryOverhead, HDFS on core nodes, bootstrap/IAM)"
+   },
+   {
+    "col": "middle",
+    "heading": "Other pipeline services",
+    "type": "cluster",
+    "why": "Step Functions (event history, Retry/Catch, Timeout), Lambda (throttles, 15m, poison pills), Kinesis (iterator age, hot shards), Athena (schema mismatch, Slow Down, MSCK), Redshift (EXPLAIN, ANALYZE/VACUUM, WLM)"
+   },
+   {
+    "col": "right",
+    "heading": "Proactive troubleshooting flow",
+    "type": "pipeline",
+    "why": "Job logs (CW retention + Spark event logs to S3) -> EventBridge (FAILED/TIMEOUT) -> SNS alert (run ID) -> SSM Automation/Lambda runbook (boto3 retry); branch: immutable raw data in S3 -> rerun partitions"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "Lesson decision guide: Glue private RDS -> self-ref SG + S3 endpoint; slow Spark task -> fix skew; slow stage -> Spark UI; EMR step fail -> S3 log URI; missing MWAA DAG -> DAG logs; Athena 0 rows -> load partitions"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 4,
+    "topic": "AWS Glue"
+   },
+   {
+    "block": 4,
+    "topic": "Amazon EMR"
+   },
+   {
+    "block": 2,
+    "topic": "Amazon MWAA"
+   },
+   {
+    "block": 5,
+    "topic": "Step Functions, Lambda, Kinesis, Athena, Redshift"
+   },
+   {
+    "block": 1,
+    "topic": "Calling SDKs from code (skill 3.1.3)"
+   },
+   {
+    "block": 6,
+    "topic": "How it works / architecture patterns"
+   },
+   {
+    "block": 7,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 3,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "28": {
+  "lesson": "dea-log-analysis",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 4,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "4 cards: Logs Insights (multi-group, per-GB, ops); Athena (S3, SerDe, partition projection, Parquet); OpenSearch (Firehose/Ingestion, tiers, Serverless); EMR (TB/day Spark parsing->Parquet)."
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "Logs Insights only queries CW Logs (S3->Athena); Athena needs partition projection; OpenSearch not cheap archive (use S3); EMR only for extreme scale; use Athena/Spectrum, don't load into Redshift."
+   },
+   {
+    "col": "middle",
+    "heading": "The four main tools",
+    "type": "table",
+    "why": "Columns: Tool | Where logs live | Strengths for CW Logs Insights, Athena, OpenSearch, EMR; brief note on CloudTrail Lake and Managed Grafana."
+   },
+   {
+    "col": "middle",
+    "heading": "Big data application logs",
+    "type": "pairs",
+    "why": "Spark <-> driver/executor & event logs (S3/UI); YARN <-> container logs to S3; MWAA Airflow <-> task logs to CW; Redshift <-> STL_/SYS_ views & audit logs (S3/CW)."
+   },
+   {
+    "col": "right",
+    "heading": "Log ingestion & analysis paths",
+    "height": 180,
+    "type": "flowchart",
+    "why": "Lambda/Glue/MWAA -> CW Logs -> Logs Insights & subscription -> Firehose -> OpenSearch + S3 Parquet; CloudTrail/VPC Flow/ALB -> S3 -> Athena (partition projection) & EMR Spark."
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "6 scenarios -> CW Logs Insights (recent logs), Athena (S3 SQL), OpenSearch (real-time dashboards/search), EMR (PB Spark), CloudTrail Lake (no-table CloudTrail SQL), Managed Grafana (multi-source)."
+   }
+  ],
+  "coverage": [
+   {
+    "block": 3,
+    "topic": "The four main tools"
+   },
+   {
+    "block": 1,
+    "topic": "CloudWatch Logs Insights"
+   },
+   {
+    "block": 1,
+    "topic": "Athena for logs"
+   },
+   {
+    "block": 1,
+    "topic": "OpenSearch Service"
+   },
+   {
+    "block": 1,
+    "topic": "EMR for large log volumes"
+   },
+   {
+    "block": 4,
+    "topic": "Big data application logs"
+   },
+   {
+    "block": 5,
+    "topic": "How it works / architecture patterns"
+   },
+   {
+    "block": 6,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "29": {
+  "lesson": "dea-data-quality-rules",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "1) SageMaker Catalog: surface Glue DQ scores for trust. 2) Consistency: DMS checksums, DQDL ReferentialIntegrity/DatasetMatch, reconciliation SQL, DataBrew profiles, lineage. 3) Simple Spark/SQL null checks."
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "Avoid custom row-by-row Lambda; DataBrew = visual/no-code vs Glue DQ = ETL/catalog DQDL; quarantine bad rows vs fail job; check early before curated; data quality != schema validation."
+   },
+   {
+    "col": "middle",
+    "heading": "Glue Data Quality vs DataBrew",
+    "type": "compare",
+    "why": "left = Glue Data Quality (Deequ/DQDL, catalog tables at rest & ETL in transit, recommendations, anomaly detection, row split, CW/EB); right = DataBrew (no-code profile jobs, rulesets, S3/EB reports, recipes)."
+   },
+   {
+    "col": "middle",
+    "heading": "Data quality dimensions",
+    "type": "table",
+    "why": "7 dimensions with check & DQDL: Completeness (IsComplete), Uniqueness (IsUnique), Validity (ColumnValues), Consistency (ReferentialIntegrity), Accuracy (reconcile), Timeliness (DataFreshness), Volume (RowCount)."
+   },
+   {
+    "col": "right",
+    "heading": "In-pipeline evaluation & quarantine",
+    "type": "pipeline",
+    "why": "S3 raw -> Glue job -> Evaluate Data Quality -> S3 curated (passing); error branch: failing rows -> S3 quarantine; side outputs: EventBridge -> SNS alert and CloudWatch metrics."
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "In-pipeline quarantine -> Glue DQ Evaluate; catalog scores -> table rulesets; suggest -> recommendations; no-code -> DataBrew rulesets; stats -> profile job; alert -> EventBridge->SNS; trust -> SageMaker Catalog."
+   }
+  ],
+  "coverage": [
+   {
+    "block": 4,
+    "topic": "Data quality dimensions"
+   },
+   {
+    "block": 3,
+    "topic": "AWS Glue Data Quality"
+   },
+   {
+    "block": 3,
+    "topic": "AWS Glue DataBrew data quality"
+   },
+   {
+    "block": 1,
+    "topic": "Data quality in the catalog"
+   },
+   {
+    "block": 1,
+    "topic": "Investigating data consistency"
+   },
+   {
+    "block": 1,
+    "topic": "Simple checks while processing"
+   },
+   {
+    "block": 6,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ },
+ "30": {
+  "lesson": "dea-sampling-and-skew",
+  "blocks": [
+   {
+    "col": "left",
+    "count": 3,
+    "heading": "Core Concepts",
+    "type": "concepts",
+    "why": "What skew is (uneven partitions; slowest task bottlenecks Spark/Kinesis/DDB/Redshift/S3), diagnosing skew (Spark UI tail, CloudWatch, SVV_TABLE_INFO), and AWS sampling tools (DataBrew, Athena, Spark, Redshift)"
+   },
+   {
+    "col": "left",
+    "type": "tips",
+    "why": "First-N rows is biased on sorted data; adding workers won't fix skew; salting breaks stream per-key order; NULL/'UNKNOWN' are hidden hot keys; TABLESAMPLE SYSTEM is faster but less random than BERNOULLI"
+   },
+   {
+    "col": "middle",
+    "heading": "Sampling techniques",
+    "type": "table",
+    "why": "6 techniques (Simple random, Systematic, Stratified, Cluster, Reservoir, First-N) with columns: Technique, Best for, and Risk (rare groups, periodic bias, known strata, cluster variance, single-pass, sort bias)"
+   },
+   {
+    "col": "middle",
+    "heading": "Skew fixes outside Spark",
+    "type": "cluster",
+    "why": "4 services: Kinesis/Kafka (high-cardinality key/suffix), DynamoDB (write sharding key#1..N, DAX), Redshift (join DISTKEY or EVEN/AUTO, SVV_TABLE_INFO.skew_rows), S3 (balanced partitions, compaction)"
+   },
+   {
+    "col": "right",
+    "heading": "Mitigating skew in Spark",
+    "type": "pipeline",
+    "why": "Flow: Spot tail (Spark UI, groupBy.count) -> AQE skewJoin (Spark 3 default) -> Broadcast small side -> Salt hot key (0..N-1) & replicate small side; branch: separate NULL/UNKNOWN keys & repartition on composite key"
+   },
+   {
+    "col": "right",
+    "type": "decisions",
+    "why": "6 scenarios: 5 TB profile -> Random/TABLESAMPLE; Region share -> Stratified; stream -> Reservoir; slow Spark join -> AQE/broadcast/salt; Redshift skew_rows -> DISTKEY/EVEN; hot shard -> high-cardinality key"
+   }
+  ],
+  "coverage": [
+   {
+    "block": 3,
+    "topic": "Sampling techniques"
+   },
+   {
+    "block": 1,
+    "topic": "What data skew is"
+   },
+   {
+    "block": 5,
+    "topic": "Mitigating skew in Spark"
+   },
+   {
+    "block": 4,
+    "topic": "Mitigating skew elsewhere"
+   },
+   {
+    "block": 6,
+    "topic": "Comparisons & decision guide"
+   },
+   {
+    "block": 2,
+    "topic": "Exam tips & traps"
+   }
+  ]
+ }
 }

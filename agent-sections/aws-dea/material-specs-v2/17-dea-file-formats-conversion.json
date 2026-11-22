@@ -1,0 +1,208 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Pruning & pushdown",
+     "name": "Columnar speedups",
+     "tag": "Amazon Athena, Redshift Spectrum",
+     "text": "Reads only needed columns & skips row groups/stripes via min/max stats. Similar values compress well via dictionary and RLE."
+    },
+    {
+     "keyword": "Parallel reads",
+     "name": "Splittability",
+     "tag": "AWS Glue, Amazon EMR",
+     "text": "Workers read parts in parallel when row groups compress independently (Parquet/ORC). One large .csv.gz cannot split."
+    },
+    {
+     "keyword": "128 MB–1 GB target",
+     "name": "File sizing",
+     "tag": "AWS Glue, Amazon Athena, Amazon Data Firehose",
+     "text": "Target 128 MB–1 GB files for Spark/Athena; tiny files add overhead. Compact via Glue, Athena CTAS, Iceberg, or Firehose buffers."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Default: Parquet/ORC + Snappy/ZSTD + balanced partitions (avoid tiny files).",
+    "GZIP CSV shrinks size but skips no columns and breaks parallel splitting.",
+    "Avro is row-based: use for Kafka/schema evolution, not columnar queries.",
+    "Firehose format conversion needs JSON input plus a Glue table schema."
+   ],
+   "type": "tips"
+  },
+  {
+   "caption": "Use row formats for landing/streaming; columnar for analytics.",
+   "col": "middle",
+   "heading": "Row vs columnar formats",
+   "left": {
+    "points": [
+     "CSV/TSV: text, no schema; simple export, slow queries.",
+     "JSON lines: nested, self-describing; verbose for logs.",
+     "Avro: binary, schema evolution for Kafka & streaming."
+    ],
+    "title": "Row-based"
+   },
+   "right": {
+    "points": [
+     "Parquet: binary, nested; Athena, Spectrum, Spark, Glue.",
+     "ORC: binary, embedded schema; best for Hive ecosystem.",
+     "Pruning, pushdown & better compression cut scan costs."
+    ],
+    "title": "Columnar"
+   },
+   "type": "compare"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Codec",
+    "Splittable?",
+    "Notes"
+   ],
+   "heading": "Compression codecs",
+   "rows": [
+    [
+     "Snappy",
+     "Yes (Parquet/ORC)",
+     "Fast, moderate ratio; Spark default"
+    ],
+    [
+     "ZSTD",
+     "Yes (Parquet/ORC)",
+     "Good balance of ratio & speed"
+    ],
+    [
+     "GZIP",
+     "No (plain text)",
+     "High ratio; .csv.gz bottlenecks"
+    ],
+    [
+     "bzip2",
+     "Yes",
+     "Splittable, but slow"
+    ],
+    [
+     "LZO / LZ4",
+     "LZO if indexed",
+     "Fast; LZO needs index to split"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "caption": "Glue is most common; CTAS is serverless SQL; Firehose converts streams; EMR for scale; DMS for DBs.",
+   "col": "middle",
+   "heading": "Ways to convert CSV to Parquet",
+   "top": "CSV / JSON / DB -> Parquet",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "Glue DynamicFrame",
+      "Partitioned Parquet",
+      "EMR: large / custom"
+     ],
+     "title": "Glue & EMR Spark"
+    },
+    {
+     "items": [
+      "Serverless SQL",
+      "One-off or scheduled"
+     ],
+     "title": "Athena CTAS"
+    },
+    {
+     "items": [
+      "JSON -> Parquet/ORC",
+      "Uses Glue schema",
+      "CSV needs Lambda"
+     ],
+     "title": "Data Firehose"
+    },
+    {
+     "items": [
+      "DB -> Parquet on S3",
+      "Direct migration"
+     ],
+     "title": "AWS DMS"
+    }
+   ]
+  },
+  {
+   "col": "right",
+   "heading": "Troubleshooting failures (1.2.7)",
+   "left_title": "Symptom",
+   "pairs": [
+    [
+     "HIVE_BAD_DATA / parse err",
+     "OpenCSVSerDe; route bad rows"
+    ],
+    [
+     "Glue choice (mixed types)",
+     "ResolveChoice; enforce type"
+    ],
+    [
+     "Schema mismatch/partition",
+     "Update catalog; evolution"
+    ],
+    [
+     "Executor / driver OOM",
+     "Repartition, salt, split"
+    ],
+    [
+     "Slow job, many tiny files",
+     "Group inputs; compact output"
+    ],
+    [
+     "Wrong timestamps",
+     "Normalize to UTC / ISO-8601"
+    ]
+   ],
+   "right_title": "Fix",
+   "type": "pairs"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Cut Athena CSV cost & speed queries",
+     "Parquet/ORC + compress + partition",
+     "Less data scanned"
+    ],
+    [
+     "Kafka stream with evolving schema",
+     "Avro + schema registry",
+     "Row-based, strong evolution"
+    ],
+    [
+     "Single 50 GB .csv.gz runs slowly",
+     "Split file or convert to Parquet",
+     "GZIP text isn't splittable"
+    ],
+    [
+     "No-code JSON stream to Parquet",
+     "Firehose format conversion",
+     "Built into delivery stream"
+    ],
+    [
+     "One-time SQL table conversion",
+     "Athena CTAS",
+     "Serverless, no job to build"
+    ],
+    [
+     "Nested JSON queried in Redshift",
+     "SUPER type or flatten in Glue",
+     "Semi-structured support"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Data Formats, Compression & Conversion (CSV to Parquet)"
+}

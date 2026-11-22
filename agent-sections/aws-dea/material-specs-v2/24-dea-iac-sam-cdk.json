@@ -1,0 +1,158 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Stacks & Rollback",
+     "name": "CFN Engine",
+     "tag": "AWS CloudFormation",
+     "text": "YAML/JSON templates define Parameters, Resources & Outputs. Stacks deploy as a unit, roll back on failure, and reuse nested stacks."
+    },
+    {
+     "keyword": "Sets, Drift, Retain",
+     "name": "Safety & Scale",
+     "tag": "AWS CloudFormation",
+     "text": "Change sets preview updates; StackSets span accounts & Regions; drift flags manual edits. DeletionPolicy Retain/Snapshot guards data."
+    },
+    {
+     "keyword": "Repeatable Envs",
+     "name": "Data-Platform IaC",
+     "tag": "AWS CloudFormation",
+     "text": "Parameterize templates (Env=dev|prod) via CI/CD for identical envs. Glue, Redshift, MWAA, Kinesis & Lake Formation support CFN."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "SAM & CDK compile to CloudFormation; never recreate envs manually.",
+    "sam package/deploy uploads to S3 — missing artifact bucket or bad CodeUri fails.",
+    "No hard-coding: use Parameters, AWS::AccountId/Region & Secrets Manager/SSM.",
+    "AWS Cloud9 & CodeCommit are out of scope — never pick them."
+   ],
+   "type": "tips"
+  },
+  {
+   "caption": "Both synthesize/transform to CloudFormation stacks.",
+   "col": "middle",
+   "heading": "AWS CDK vs AWS SAM",
+   "left": {
+    "points": [
+     "TS, Python, Java, C#, or Go (loops, classes)",
+     "L1 Cfn*, L2 defaults/grantRead, L3 patterns",
+     "cdk synth (CFN), cdk diff, cdk deploy",
+     "Reusable team constructs in general-purpose code"
+    ],
+    "title": "AWS CDK"
+   },
+   "right": {
+    "points": [
+     "CFN Transform: AWS::Serverless-2016-10-31",
+     "Function, StateMachine, SimpleTable, Api/Layer",
+     "Policy templates: S3ReadPolicy, DynamoDBCrudPolicy",
+     "sam build, package, deploy --guided, local, sync"
+    ],
+    "title": "AWS SAM"
+   },
+   "type": "compare"
+  },
+  {
+   "branch": {
+    "from": 2,
+    "label": "Error",
+    "target": "Auto Rollback"
+   },
+   "col": "middle",
+   "heading": "Serverless SAM pipeline/deploy",
+   "stages": [
+    {
+     "label": "SAM (dev|prod)"
+    },
+    {
+     "label": "sam build/pkg S3"
+    },
+    {
+     "label": "CFN Stack dev/prod"
+    },
+    {
+     "label": "S3->EB->SFN/L/DDB"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "right",
+   "heading": "Key CLI & CFN operations",
+   "left_title": "Operation",
+   "pairs": [
+    [
+     "Change sets / cdk diff",
+     "Preview replace vs modify"
+    ],
+    [
+     "StackSets",
+     "Multi-account & Region"
+    ],
+    [
+     "Drift detection",
+     "Detect manual changes"
+    ],
+    [
+     "sam package",
+     "S3 upload & CodeUri"
+    ],
+    [
+     "sam local / sync",
+     "Local invoke & dev sync"
+    ],
+    [
+     "cdk synth",
+     "Emit CFN template"
+    ]
+   ],
+   "right_title": "Effect",
+   "type": "pairs"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Lambda + SFN + DDB pipeline",
+     "AWS SAM",
+     "Serverless shorthand + CLI"
+    ],
+    [
+     "Python reusable constructs",
+     "AWS CDK",
+     "Code synthesizing CFN"
+    ],
+    [
+     "50 accounts & 3 Regions",
+     "CFN StackSets",
+     "Multi-account/Region deploy"
+    ],
+    [
+     "Preview prod stack update",
+     "Change sets / cdk diff",
+     "See replacements first"
+    ],
+    [
+     "Detect manual console edits",
+     "Drift detection",
+     "Compares live state vs template"
+    ],
+    [
+     "Keep S3 data on stack delete",
+     "DeletionPolicy: Retain",
+     "Protects data stores"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Infrastructure as Code — CloudFormation, CDK & SAM"
+}

@@ -1,0 +1,206 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "PRs & CodeConnections",
+     "name": "Git & Branches",
+     "tag": "AWS CodeConnections",
+     "text": "Store ETL, SQL, DAGs & IaC. Branch, commit, pull/push, revert, tag; PRs deploy via CodeConnections."
+    },
+    {
+     "keyword": "Spark, SQL & Lambda",
+     "name": "Code Optimization",
+     "text": "Filter early, built-in Spark over UDFs, broadcast joins, cache/unpersist, no collect/SELECT *, reuse Lambda clients."
+    },
+    {
+     "keyword": "Audit & SLAs",
+     "name": "Logging & Metrics",
+     "text": "Emit JSON logs with run/ARN correlation IDs, row/reject metrics, and failure/SLA alarms."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "No prod console edits; CodeCommit/Cloud9 out -> CodeConnections.",
+    "CodePipeline orchestrates; CodeBuild tests; CodeDeploy shifts.",
+    "git pull = fetch + merge; avoid rebase on shared branches.",
+    "Separate dev/test/prod accounts; promote the same artifact."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "heading": "AWS developer tools",
+   "top": "AWS CI/CD services",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "GitHub / GitLab",
+      "Bitbucket repos"
+     ],
+     "title": "CodeConnections"
+    },
+    {
+     "items": [
+      "Stage orchestration",
+      "Manual approvals"
+     ],
+     "title": "CodePipeline"
+    },
+    {
+     "items": [
+      "buildspec.yml",
+      "Tests, lint & package"
+     ],
+     "title": "CodeBuild"
+    },
+    {
+     "items": [
+      "CodeDeploy: Lambda/ECS",
+      "CFN / CDK / SAM deploy"
+     ],
+     "title": "Deploy & IaC"
+    }
+   ]
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Test",
+    "Checks",
+    "Tool / Example"
+   ],
+   "heading": "Testing data pipelines",
+   "rows": [
+    [
+     "Unit",
+     "Transforms",
+     "pytest + Glue Docker"
+    ],
+    [
+     "Schema",
+     "Cols & types",
+     "Fail build if missing"
+    ],
+    [
+     "Data quality",
+     "Values/ranges",
+     "Glue DQDL rulesets"
+    ],
+    [
+     "Integration",
+     "E2E in dev",
+     "Step Functions + S3"
+    ],
+    [
+     "IaC",
+     "Templates/IAM",
+     "cfn-lint, cdk, Analyzer"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "col": "middle",
+   "heading": "Choosing languages",
+   "left_title": "Language",
+   "pairs": [
+    [
+     "SQL",
+     "Redshift, Athena, views, DQ"
+    ],
+    [
+     "Python / PySpark",
+     "Glue, EMR, Lambda, Airflow"
+    ],
+    [
+     "Scala / Java",
+     "Fast Spark, Flink, Kafka"
+    ],
+    [
+     "R",
+     "Stats & SageMaker notebooks"
+    ],
+    [
+     "Bash / PowerShell",
+     "Scripting, bootstrap, CLI"
+    ]
+   ],
+   "right_title": "Typical use",
+   "type": "pairs"
+  },
+  {
+   "branch": {
+    "from": 4,
+    "label": "fail / alarm",
+    "target": "Stop / rollback"
+   },
+   "col": "right",
+   "heading": "CI/CD pipeline flow",
+   "stages": [
+    {
+     "label": "Feature branch"
+    },
+    {
+     "label": "PR + review"
+    },
+    {
+     "label": "CodeConnections"
+    },
+    {
+     "label": "CodeBuild",
+     "note": "buildspec: pytest, cfn-lint, sam"
+    },
+    {
+     "label": "Dev + DQ tests"
+    },
+    {
+     "label": "Manual approval"
+    },
+    {
+     "label": "Prod CFN deploy"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Auto test/deploy dev->prod",
+     "CodePipeline+CodeBuild+IaC",
+     "Managed CI/CD + approval"
+    ],
+    [
+     "Gradual Lambda shift",
+     "CodeDeploy canary/linear",
+     "Alarm-backed rollback"
+    ],
+    [
+     "Track Glue/DAGs + review",
+     "Git repo + pull requests",
+     "Version control + review"
+    ],
+    [
+     "Slow Glue Python UDFs",
+     "Built-in Spark functions",
+     "Avoids row serialization"
+    ],
+    [
+     "Local PySpark unit tests",
+     "Glue Docker/Spark + pytest",
+     "Fast pre-deploy feedback"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "CI/CD, Version Control, Testing & Optimization"
+}

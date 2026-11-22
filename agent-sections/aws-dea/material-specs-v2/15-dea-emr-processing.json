@@ -1,0 +1,197 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Fleets vs groups",
+     "name": "EC2 Node Types",
+     "tag": "Amazon EMR on EC2",
+     "text": "Primary (YARN/HDFS; 3 for HA). Core runs tasks + HDFS (On-Demand). Task is compute-only (Spot). Fleets mix types; groups use one."
+    },
+    {
+     "keyword": "Transient vs long",
+     "name": "Cluster Lifecycle",
+     "tag": "EMR Managed Scaling",
+     "text": "Transient clusters run batch steps then terminate. Long-running clusters use managed scaling (YARN metrics) and auto-termination."
+    },
+    {
+     "keyword": "Ops & debugging",
+     "name": "EMR Tooling",
+     "tag": "EMR Studio, Amazon S3",
+     "text": "Bootstrap actions configure nodes at launch. Steps run jobs (ActionOnFailure). EMR Studio hosts notebooks; logs archive to S3 URI."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Avoid Spot on core nodes (HDFS loss risk)—use Spot on task nodes. HDFS is ephemeral; store data of record in S3.",
+    "'Least operational overhead' favors Glue or EMR Serverless over EMR on EC2 unless custom frameworks/tuning are needed.",
+    "Debug failed steps on terminated clusters via the S3 log URI (cluster, step, and YARN logs) or Spark history server.",
+    "Use Glue Data Catalog as Hive metastore to share tables with Athena/Glue. TB-scale log processing often points to EMR."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Option",
+    "What you manage",
+    "Best for"
+   ],
+   "heading": "Deployment options",
+   "rows": [
+    [
+     "EMR on EC2",
+     "Cluster size, EC2 types, scaling, apps, bootstrap",
+     "Full control, Hive/HBase/Trino/Flink, Spot task fleets"
+    ],
+    [
+     "EMR Serverless",
+     "Release, initial and max capacity settings",
+     "Clusterless Spark & Hive; pay per vCPU, memory, storage"
+    ],
+    [
+     "EMR on EKS",
+     "Your Amazon EKS Kubernetes cluster",
+     "Kubernetes-standardized orgs running Spark beside containers"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "caption": "Decoupling storage (S3) from compute is the modern pattern and enables transient clusters.",
+   "col": "middle",
+   "heading": "HDFS vs EMRFS (S3)",
+   "left": {
+    "points": [
+     "Ephemeral: data disappears when cluster terminates",
+     "Local disks: fast for iterative intermediate data",
+     "Use for scratch space or HBase on HDFS"
+    ],
+    "title": "HDFS"
+   },
+   "right": {
+    "points": [
+     "Persistent: independent of cluster lifetime",
+     "Scalable throughput; slightly higher latency",
+     "Use for input/output data of record & data lake"
+    ],
+    "title": "EMRFS (Amazon S3)"
+   },
+   "type": "compare"
+  },
+  {
+   "caption": "Hive shares metadata via Glue Data Catalog; HBase runs on HDFS or S3.",
+   "col": "middle",
+   "heading": "Big data frameworks",
+   "top": "Amazon EMR Applications",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "Apache Spark (SQL/ML)",
+      "Apache Flink (stream)"
+     ],
+     "title": "Compute & Stream"
+    },
+    {
+     "items": [
+      "Hive (Glue metastore)",
+      "Presto / Trino (SQL)",
+      "HBase (wide-column)"
+     ],
+     "title": "SQL & NoSQL"
+    },
+    {
+     "items": [
+      "Apache Hudi",
+      "Apache Iceberg",
+      "Delta Lake"
+     ],
+     "title": "Table Formats"
+    },
+    {
+     "items": [
+      "JupyterHub",
+      "Apache Livy"
+     ],
+     "title": "Notebooks"
+    }
+   ]
+  },
+  {
+   "branch": {
+    "from": 2,
+    "label": "archive logs",
+    "target": "S3 log URI (debug after exit)"
+   },
+   "col": "right",
+   "heading": "Transient batch ETL pattern",
+   "stages": [
+    {
+     "label": "Step Functions / MWAA",
+     "note": "createCluster + addStep.sync"
+    },
+    {
+     "label": "S3 Raw Zone",
+     "note": "Input data via EMRFS"
+    },
+    {
+     "label": "Transient EMR Cluster",
+     "note": "OD core, Spot task fleets"
+    },
+    {
+     "label": "S3 Curated + Glue Catalog",
+     "note": "Parquet/Iceberg + partitions"
+    },
+    {
+     "label": "Terminate Cluster",
+     "note": "Or use EMR Serverless (no ops)"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Serverless Spark ETL, least overhead",
+     "AWS Glue",
+     "Fully managed ETL with built-in catalog"
+    ],
+    [
+     "Spark/Hive without clusters, EMR code",
+     "EMR Serverless",
+     "Zero cluster ops, EMR runtime compatible"
+    ],
+    [
+     "HBase/Trino/Flink or Spot batch cost",
+     "EMR on EC2 (Spot task fleets)",
+     "Broad frameworks; Spot tasks hold no HDFS"
+    ],
+    [
+     "Org standardized on Kubernetes",
+     "EMR on EKS",
+     "Runs Spark alongside existing EKS workloads"
+    ],
+    [
+     "Idle most of day / variable load",
+     "Transient, auto-term, managed scaling",
+     "Pay only during jobs; auto-resize on YARN"
+    ],
+    [
+     "Persist data beyond cluster lifetime",
+     "EMRFS / Amazon S3",
+     "HDFS is ephemeral and lost on termination"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Amazon EMR — Clusters, Serverless, EKS & Big Data Frameworks"
+}

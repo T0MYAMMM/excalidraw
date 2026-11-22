@@ -1,0 +1,191 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "cron & pipes",
+     "name": "EB Rules & Pipes",
+     "tag": "Amazon EventBridge",
+     "text": "6-field UTC cron (m h dom mon dow yr; ? in dom/dow). Rules match service state changes; Pipes link SQS, Kinesis, DDB Streams, MSK."
+    },
+    {
+     "keyword": "4 trigger types",
+     "name": "Glue Triggers",
+     "tag": "AWS Glue",
+     "text": "On-demand, scheduled (cron), conditional (after job or crawler succeeds), and workflow event triggers from EventBridge."
+    },
+    {
+     "keyword": "avoid 1-per-file",
+     "name": "Batch Small Files",
+     "tag": "AWS Glue, Amazon SQS",
+     "text": "Batch thousands of small files via Glue workflow events (N events/T sec), S3 to SQS batching, or scheduled jobs with bookmarks."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "S3 Event Notifications cannot target Step Functions or Glue directly; route via EventBridge or Lambda.",
+    "EventBridge scheduled rules use UTC only; prefer EventBridge Scheduler for time zones, DST, and one-time runs.",
+    "Avoid cron-Lambda S3 polling or Lambda sleep loops; use S3 events, EventBridge, or Step Functions .sync.",
+    "Enabling EventBridge on an S3 bucket sends all bucket events to the default bus; rules filter what matters."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Option",
+    "Key Features"
+   ],
+   "heading": "Time-based schedulers",
+   "rows": [
+    [
+     "EventBridge Scheduler",
+     "TZ/DST, one-time, windows, DLQ, 270+ targets"
+    ],
+    [
+     "EventBridge Rules",
+     "Older; cron()/rate() in UTC only"
+    ],
+    [
+     "Glue Triggers/Crawlers",
+     "Built-in cron for jobs & crawlers"
+    ],
+    [
+     "Amazon MWAA",
+     "Airflow DAGs, datasets, backfills"
+    ],
+    [
+     "Redshift Sched. Queries",
+     "SQL via Data API + EventBridge"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "caption": "S3 Notifications for simple triggers; EventBridge for rich routing.",
+   "col": "middle",
+   "heading": "S3 Notifications vs S3 → EventBridge",
+   "left": {
+    "points": [
+     "Per-bucket; prefix & suffix filters",
+     "Simple setup, low latency",
+     "Lambda, SQS, or SNS targets only"
+    ],
+    "title": "S3 Event Notifications"
+   },
+   "right": {
+    "points": [
+     "All bucket events to default bus",
+     "Rich content filtering",
+     "Step Functions, Glue, ECS, API targets",
+     "Event archive and replay"
+    ],
+    "title": "S3 → EventBridge"
+   },
+   "type": "compare"
+  },
+  {
+   "caption": "Use Glue triggers for simple chains, EventBridge for loose coupling, SFN/MWAA for complex flows.",
+   "col": "middle",
+   "heading": "Job chaining options",
+   "top": "Pick by chain complexity",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "Conditional trigger",
+      "Glue-only chains"
+     ],
+     "title": "Glue Triggers"
+    },
+    {
+     "items": [
+      "Glue State Change",
+      "SUCCEEDED -> next",
+      "Loose coupling"
+     ],
+     "title": "EventBridge Rules"
+    },
+    {
+     "items": [
+      "Branching & retries",
+      "Parallelism",
+      "Full visibility"
+     ],
+     "title": "SFN or MWAA"
+    }
+   ]
+  },
+  {
+   "branch": {
+    "from": 2,
+    "label": "on failure",
+    "target": "SNS failure alert"
+   },
+   "col": "right",
+   "heading": "File-arrival pipeline",
+   "stages": [
+    {
+     "label": "Upload to S3",
+     "note": "s3://raw/orders/*.parquet"
+    },
+    {
+     "label": "EventBridge Rule",
+     "note": "bucket=raw, orders/*.parquet"
+    },
+    {
+     "label": "Step Functions",
+     "note": "Runs Glue job (.sync)"
+    },
+    {
+     "label": "Crawl & Notify",
+     "note": "Glue crawler then notify"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "02:00 local time with DST",
+     "EventBridge Scheduler",
+     "Supports time zones; rules are UTC-only"
+    ],
+    [
+     "Process on file arrival, minimal setup",
+     "S3 Notification → Lambda",
+     "Direct and low latency"
+    ],
+    [
+     "Route S3 to many targets + replay",
+     "S3 → EventBridge rules",
+     "Content filtering, targets, archive/replay"
+    ],
+    [
+     "Glue job B after A / daily partition crawl",
+     "Glue trigger / crawler schedule",
+     "Native Glue dependency & catalog sync"
+    ],
+    [
+     "Alert when any Glue job fails",
+     "EventBridge rule → SNS",
+     "Matches Glue Job State Change events"
+    ],
+    [
+     "Complex DAGs, backfills, Python",
+     "Amazon MWAA",
+     "Airflow scheduler, catchup & backfills"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Schedulers & Event Triggers (DEA-C01)"
+}

@@ -1,0 +1,188 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Lambda limits",
+   "items": [
+    {
+     "label": "Max timeout; 6 MB sync payload",
+     "value": "15 min"
+    },
+    {
+     "label": "Max RAM (128 MB min); up to 6 vCPUs",
+     "value": "10,240 MB"
+    },
+    {
+     "label": "/tmp 512M-10G, image; 50/250M, 5 layers",
+     "value": "10 GB"
+    },
+    {
+     "label": "Default concurrency/Region (soft quota)",
+     "value": "1,000"
+    }
+   ],
+   "type": "callouts"
+  },
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "req/s × duration",
+     "name": "Concurrency",
+     "tag": "AWS Lambda, Amazon SQS, Kinesis",
+     "text": "Shared unreserved pool; 429 sync vs 6h async retry. SQS uses max concurrency; Kinesis/DDB Streams scale by shards × parallelization."
+    },
+    {
+     "keyword": "Know the limits",
+     "name": "When NOT to use",
+     "tag": "AWS Glue, Amazon EMR, Step Functions",
+     "text": "Skip for >15 min runs, >10 GB RAM/GPUs, GB–TB joins, steady high-throughput (use EMR/ECS), or sync chaining (use Step Functions)."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Set memory, not CPU: CPU & network scale with memory, so higher RAM often runs faster and cheaper.",
+    "EFS requires a VPC; add VPC endpoints or a NAT gateway if Lambda also calls S3 or AWS APIs.",
+    "Reserved concurrency guarantees & caps capacity; provisioned concurrency removes cold starts.",
+    "DLQ/on-failure dest is async-only (streams use ESM dest). Put heavy libs in layers or container images."
+   ],
+   "type": "tips"
+  },
+  {
+   "caption": "Reserved = guarantee + cap (free); Provisioned = warm instances for low latency (paid).",
+   "col": "middle",
+   "heading": "Reserved vs provisioned concurrency",
+   "left": {
+    "points": [
+     "Guarantees capacity up to N from account pool",
+     "Caps max concurrency at N to protect downstream DBs",
+     "Setting reserved concurrency to 0 pauses the function"
+    ],
+    "title": "Reserved concurrency"
+   },
+   "right": {
+    "points": [
+     "Pre-initialized environments eliminate cold starts",
+     "Billed continuously while configured",
+     "Best for latency-sensitive APIs; rarely for batch ETL"
+    ],
+    "title": "Provisioned concurrency"
+   },
+   "type": "compare"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Option",
+    "Persistence",
+    "Use for"
+   ],
+   "heading": "Storage options inside Lambda",
+   "rows": [
+    [
+     "/tmp (512 MB–10 GB)",
+     "Ephemeral (env lifetime)",
+     "Downloading, unzipping, scratch/intermediate files"
+    ],
+    [
+     "Amazon EFS (/mnt/*)",
+     "Persistent, shared across runs & ECS/EC2",
+     "Shared refs/ML; VPC, NFS 2049 SG, access pt, ClientMount/Write"
+    ],
+    [
+     "Amazon S3",
+     "Persistent object storage",
+     "Input and output data (stream or download)"
+    ],
+    [
+     "Layers / container",
+     "Read-only code & dependencies",
+     "Heavy libraries like pandas or pyarrow (up to 10 GB image)"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "caption": "For >few hundred MB inputs use Glue; for longer multi-step orchestration prefer Step Functions.",
+   "col": "right",
+   "heading": "Automation patterns",
+   "top": "AWS Lambda (Event-Driven)",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "pyarrow -> curated S3",
+      "Metadata to DynamoDB",
+      "<= few hundred MB"
+     ],
+     "title": "S3 CSV -> Parquet"
+    },
+    {
+     "items": [
+      "glue.start_job_run",
+      "athena start_query",
+      "Redshift Data API"
+     ],
+     "title": "Job Kick-offs"
+    },
+    {
+     "items": [
+      "Kinesis & DDB Streams",
+      "Amazon MSK via ESM",
+      "Firehose enrichment"
+     ],
+     "title": "Stream Consumers"
+    },
+    {
+     "items": [
+      "Athena federated",
+      "Query custom sources"
+     ],
+     "title": "Custom Connectors"
+    }
+   ]
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "RDS spike or critical function must scale",
+     "Reserved concurrency (cap / guarantee)",
+     "Caps DB connections (+ RDS Proxy/SQS) or guarantees pool share"
+    ],
+    [
+     "Eliminate cold-start latency for API",
+     "Provisioned concurrency",
+     "Pre-initialized execution environments"
+    ],
+    [
+     "3 GB shared ref vs 4 GB temp unzip",
+     "Mount EFS vs increase /tmp (up to 10 GB)",
+     "EFS is persistent & shared; /tmp is ephemeral scratch space"
+    ],
+    [
+     "CPU-bound transform is slow",
+     "Increase memory",
+     "CPU & network scale proportionally with memory"
+    ],
+    [
+     "Dependencies exceed 50/250 MB zip limit",
+     "Container image (up to 10 GB)",
+     "Supports much larger deployment packages"
+    ],
+    [
+     "Job takes 40 minutes",
+     "Glue / ECS / Batch / Step Functions split",
+     "Exceeds Lambda's 15-minute max timeout"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "AWS Lambda: Concurrency, Storage & Data Automation"
+}

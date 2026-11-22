@@ -1,0 +1,162 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Trust signals",
+     "name": "Catalog DQ Scores",
+     "tag": "Amazon SageMaker Catalog",
+     "text": "Surface Glue DQ scores in SageMaker Catalog so consumers see dataset quality before subscribing."
+    },
+    {
+     "keyword": "Cross-dataset",
+     "name": "Data Consistency",
+     "tag": "AWS DMS, AWS Glue",
+     "text": "Use DMS checksums, DQDL ReferentialIntegrity/DatasetMatch, Athena/Redshift reconciliation SQL, DataBrew profiles, and lineage."
+    },
+    {
+     "keyword": "Spark / SQL",
+     "name": "Simple Checks",
+     "tag": "AWS Glue",
+     "text": "Filter nulls or blanks in Spark/SQL and fail on threshold; managed DQ adds history, scoring, and reports."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Avoid row-by-row Lambda; use Glue DQ (DQDL) or DataBrew (no-code).",
+    "Quarantine bad rows via row split instead of failing the whole job.",
+    "Run quality checks early before data reaches curated zones.",
+    "Data quality != schema: valid schema can hold nulls or dupes."
+   ],
+   "type": "tips"
+  },
+  {
+   "caption": "Glue DQ for ETL/catalog automation; DataBrew for visual no-code prep.",
+   "col": "middle",
+   "heading": "Glue Data Quality vs DataBrew",
+   "left": {
+    "points": [
+     "Built on Deequ using DQDL rules",
+     "Catalog tables (at rest) & ETL (in transit)",
+     "Auto rule recommendations & anomaly detection",
+     "Split bad rows; CloudWatch & EventBridge"
+    ],
+    "title": "AWS Glue Data Quality"
+   },
+   "right": {
+    "points": [
+     "Visual, no-code data preparation tool",
+     "Profile jobs: nulls, distincts, outliers",
+     "No-code rulesets run during profile jobs",
+     "S3/console reports, EventBridge & recipes"
+    ],
+    "title": "AWS Glue DataBrew"
+   },
+   "type": "compare"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Dimension",
+    "Check",
+    "DQDL"
+   ],
+   "heading": "Data quality dimensions",
+   "rows": [
+    [
+     "Completeness/Unique",
+     "No nulls or dupes",
+     "IsComplete/IsUnique"
+    ],
+    [
+     "Validity",
+     "Valid format/range",
+     "ColumnValues"
+    ],
+    [
+     "Consistency",
+     "Datasets agree",
+     "ReferentialIntegrity"
+    ],
+    [
+     "Accuracy",
+     "Matches source",
+     "Reconcile SQL"
+    ],
+    [
+     "Freshness/Volume",
+     "Fresh, valid count",
+     "Freshness/RowCount"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "branch": {
+    "from": 2,
+    "label": "fail; EB/CW",
+    "target": "S3 quarantine"
+   },
+   "col": "right",
+   "heading": "In-pipeline eval & quarantine",
+   "stages": [
+    {
+     "label": "S3 raw"
+    },
+    {
+     "label": "Glue job"
+    },
+    {
+     "label": "Evaluate DQ"
+    },
+    {
+     "label": "S3 curated"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Validate in Glue ETL & quarantine bad rows",
+     "Glue DQ Evaluate transform",
+     "In-pipeline row-level split"
+    ],
+    [
+     "Scheduled catalog checks or rule suggestions",
+     "Glue DQ table rulesets/recs",
+     "At-rest scores & profiling recs"
+    ],
+    [
+     "Analysts define rules without code",
+     "DataBrew DQ rulesets",
+     "Visual, no-code validation"
+    ],
+    [
+     "Profile nulls, distributions & outliers",
+     "DataBrew profile job",
+     "Automated column statistics"
+    ],
+    [
+     "Alert when quality checks fail",
+     "EventBridge -> SNS",
+     "Event-driven notifications"
+    ],
+    [
+     "Show quality trust signals to consumers",
+     "SageMaker Catalog scores",
+     "Trust before subscribing"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Ensuring Data Quality: Glue DQ, DQDL & DataBrew"
+}

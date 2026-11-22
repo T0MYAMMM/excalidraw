@@ -1,0 +1,234 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Python + Schedule",
+     "name": "DAGs & Operators",
+     "tag": "Amazon MWAA",
+     "text": "DAGs define tasks (operators), sensors (wait conditions), schedules (cron/presets/datasets), XCom (small metadata), and backfill/catchup."
+    },
+    {
+     "keyword": "Celery Executor",
+     "name": "MWAA Components",
+     "tag": "Amazon MWAA",
+     "text": "Scheduler triggers tasks, auto-scaling Celery workers run them, UI shows status. Amazon provider adds Glue, EMR, Redshift, Athena, S3."
+    },
+    {
+     "keyword": "Lift-and-Shift",
+     "name": "Best Use Cases",
+     "tag": "Amazon MWAA",
+     "text": "Best for lift-and-shift Airflow DAGs and complex multi-system pipelines (dbt, EMR, Redshift, SaaS APIs) with backfills and SLAs."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Not serverless: bills continuously even when idle (use Step Functions if sporadic); DAGs live in S3, not Git.",
+    "Missing DAG -> check CloudWatch DAG processing logs first; failed task -> check task logs.",
+    "XCom is for small metadata only (e.g. run IDs)—pass large datasets via Amazon S3.",
+    "Private VPC cannot reach PyPI (bundle wheels in S3 plugins.zip); DAGs must be acyclic with task retries/retry_delay."
+   ],
+   "type": "tips"
+  },
+  {
+   "branch": {
+    "from": 2,
+    "label": "on task fail",
+    "target": "retries/retry_delay + CW Task Logs"
+   },
+   "col": "middle",
+   "heading": "Example DAG flow",
+   "stages": [
+    {
+     "label": "Schedule (0 2 * * *)",
+     "note": "catchup=False, triggers DAG"
+    },
+    {
+     "label": "S3KeySensor",
+     "note": "wait _SUCCESS, mode='reschedule'"
+    },
+    {
+     "label": "GlueJobOperator",
+     "note": "ETL sales_to_parquet"
+    },
+    {
+     "label": "RedshiftDataOperator",
+     "note": "REFRESH MATERIALIZED VIEW"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Symptom",
+    "Cause",
+    "Fix"
+   ],
+   "heading": "Troubleshooting MWAA (3.1.2)",
+   "rows": [
+    [
+     "DAG missing in UI",
+     "Import error, missing pkg, wrong S3 prefix",
+     "CW DAG processing logs & UI Broken DAG banner"
+    ],
+    [
+     "requirements.txt fails",
+     "Version conflict or no PyPI in private VPC",
+     "Pin Airflow constraints; wheels in plugins.zip"
+    ],
+    [
+     "AccessDenied / VPC block",
+     "Exec role missing IAM or SG/route blocks DB",
+     "Task logs + IAM exec role; fix VPC/SG/endpoints"
+    ],
+    [
+     "Tasks stay queued",
+     "Too few workers or low concurrency",
+     "Raise max workers/env class; check QueuedTasks"
+    ],
+    [
+     "Sensors hog workers",
+     "Sensor running in poke mode",
+     "Use mode='reschedule' or deferrable operators"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "col": "right",
+   "edges": [
+    {
+     "from": "s3_dags",
+     "label": "sync DAGs",
+     "to": "env"
+    },
+    {
+     "from": "s3_deps",
+     "label": "pkgs/plugins",
+     "to": "workers"
+    },
+    {
+     "from": "secrets",
+     "label": "vars & conns",
+     "to": "env"
+    },
+    {
+     "from": "env",
+     "label": "schedule",
+     "to": "workers"
+    },
+    {
+     "from": "role",
+     "label": "IAM auth",
+     "to": "targets"
+    },
+    {
+     "from": "workers",
+     "label": "run jobs",
+     "to": "targets"
+    },
+    {
+     "from": "workers",
+     "label": "task/DAG logs",
+     "to": "cw"
+    }
+   ],
+   "groups": [
+    {
+     "nodes": [
+      {
+       "id": "s3_dags",
+       "label": "S3: dags/ & startup"
+      },
+      {
+       "id": "s3_deps",
+       "label": "S3: reqs & plugins.zip"
+      },
+      {
+       "id": "secrets",
+       "label": "Secrets Manager"
+      }
+     ],
+     "title": "S3 & Secrets"
+    },
+    {
+     "nodes": [
+      {
+       "id": "env",
+       "label": "Env (mw1.*, 2 priv AZ)"
+      },
+      {
+       "id": "workers",
+       "label": "Auto-scaling Workers"
+      },
+      {
+       "id": "role",
+       "label": "IAM Execution Role"
+      }
+     ],
+     "title": "MWAA in VPC"
+    },
+    {
+     "nodes": [
+      {
+       "id": "targets",
+       "label": "Glue / EMR / Redshift"
+      },
+      {
+       "id": "cw",
+       "label": "CloudWatch Logs"
+      }
+     ],
+     "title": "Targets & Logs"
+    }
+   ],
+   "heading": "MWAA architecture",
+   "height": 175,
+   "type": "flowchart"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Migrate existing Airflow DAGs",
+     "Amazon MWAA",
+     "Same open-source Airflow, no rewrite"
+    ],
+    [
+     "Complex multi-system Python DAGs",
+     "Amazon MWAA",
+     "Rich operators, backfills, SLAs"
+    ],
+    [
+     "Serverless, pay-per-use, AWS-only",
+     "Step Functions",
+     "No environment to size or run idle"
+    ],
+    [
+     "Simple Glue crawler & job sequence",
+     "Glue workflows",
+     "Built natively into AWS Glue"
+    ],
+    [
+     "Run one job hourly, nothing else",
+     "EventBridge Scheduler",
+     "Simplest managed schedule"
+    ],
+    [
+     "Wait for S3 file before running",
+     "S3KeySensor or S3->EB->SFN",
+     "Event-driven or sensor wait"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Amazon MWAA — Managed Apache Airflow"
+}

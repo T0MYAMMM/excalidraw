@@ -1,0 +1,218 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "backoff + jitter",
+     "name": "Retries & Backoff",
+     "tag": "AWS SDKs, Step Functions, Glue, Lambda",
+     "text": "Retry transient throttling/timeouts with growing waits + jitter. Built into SDKs, SFN Retry, Glue MaxRetries, Lambda async/ESM."
+    },
+    {
+     "keyword": "safe reruns",
+     "name": "Idempotency",
+     "tag": "S3, Redshift, Iceberg, DynamoDB, Glue",
+     "text": "At-least-once delivery is common. Overwrite S3 partitions, MERGE on keys, use DDB conditional writes, or Glue bookmarks/checkpoints."
+    },
+    {
+     "keyword": "durable buffer",
+     "name": "SQS Decoupling",
+     "tag": "Amazon SQS, SQS DLQ",
+     "text": "Buffers bursts up to 14 days so sides scale independently. Set visibility timeout > processing time; redrive failed msgs to DLQ."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "caption": "Publish once to SNS; fan out to SQS queues (durable copies) or email/Lambda alerts.",
+   "col": "left",
+   "heading": "Alerts with SNS",
+   "top": "Amazon SNS (Pub/Sub Topic)",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "Glue/Lambda errors",
+      "IteratorAge lag",
+      "SQS age / DLQ depth>0"
+     ],
+     "title": "CloudWatch Alarms"
+    },
+    {
+     "items": [
+      "Glue FAILED/TIMEOUT",
+      "SFN exec FAILED",
+      "EMR/DataBrew/DQ fail"
+     ],
+     "title": "EventBridge Rules"
+    },
+    {
+     "items": [
+      "Catch branch -> SNS"
+     ],
+     "title": "Step Functions"
+    },
+    {
+     "items": [
+      "Multiple SQS queues",
+      "Email, SMS, HTTPS",
+      "Lambda, Firehose"
+     ],
+     "title": "Fan-out Targets"
+    }
+   ]
+  },
+  {
+   "col": "left",
+   "items": [
+    "SNS is push (no retention) for fan-out/alerts; SQS is pull & durable for buffering work queues.",
+    "SQS visibility timeout < processing time causes duplicate processing; set it longer than max runtime.",
+    "Cap retries then route to a DLQ or alert — never retry forever; pair every DLQ with a CloudWatch alarm.",
+    "FIFO queues give ordering & exactly-once dedup, but lower throughput than Standard — use only if ordering is needed."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Quality",
+    "Meaning",
+    "AWS techniques"
+   ],
+   "heading": "The five qualities",
+   "rows": [
+    [
+     "Performance",
+     "Meets latency & throughput",
+     "Right-sized compute, partitioning, columnar formats, parallelism"
+    ],
+    [
+     "Availability",
+     "Runs despite component failure",
+     "Multi-AZ managed services (S3, DDB, Kinesis, SQS), Multi-AZ RDS/MSK"
+    ],
+    [
+     "Scalability",
+     "Handles growth w/o redesign",
+     "Serverless & auto scaling (Glue, Kinesis on-demand, Lambda)"
+    ],
+    [
+     "Resiliency",
+     "Auto-recovers from failure",
+     "Retries with backoff, checkpoints, restartable jobs"
+    ],
+    [
+     "Fault tolerance",
+     "No data loss on step failure",
+     "Durable buffers (SQS, Kinesis), DLQs, raw S3 kept for replay"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "col": "middle",
+   "heading": "Dead-letter destinations",
+   "left_title": "Service",
+   "pairs": [
+    [
+     "SQS consumer",
+     "Redrive policy -> SQS DLQ"
+    ],
+    [
+     "Lambda async invoke",
+     "On-failure dest or DLQ"
+    ],
+    [
+     "Lambda stream ESM",
+     "ESM on-failure destination"
+    ],
+    [
+     "EventBridge target",
+     "Retry policy + SQS DLQ"
+    ],
+    [
+     "SNS subscription",
+     "Redrive policy -> SQS DLQ"
+    ],
+    [
+     "Data Firehose",
+     "S3 error prefix"
+    ]
+   ],
+   "right_title": "Failure capture",
+   "type": "pairs"
+  },
+  {
+   "branch": {
+    "from": 1,
+    "label": "after 5 failures",
+    "target": "SQS DLQ -> CW alarm>0 -> SNS Email/Chat"
+   },
+   "col": "right",
+   "heading": "Resilient pipeline & alerting",
+   "stages": [
+    {
+     "label": "S3 raw (immutable)",
+     "note": "Keep raw for replay; Multi-AZ durable"
+    },
+    {
+     "label": "SQS queue",
+     "note": "Buffers bursts; timeout > runtime"
+    },
+    {
+     "label": "Lambda / Glue / EMR",
+     "note": "Checkpoints, timeouts, EMR Core OD"
+    },
+    {
+     "label": "S3 curated",
+     "note": "Idempotent partition overwrite"
+    },
+    {
+     "label": "EventBridge -> SNS",
+     "note": "Glue FAILED -> Email / Chat Lambda"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Email team when Glue job fails",
+     "EventBridge (Glue State Change) -> SNS email",
+     "Event-driven alerting, no polling"
+    ],
+    [
+     "Same event to 3 independent consumers",
+     "SNS -> multiple SQS queues (fan-out)",
+     "Each consumer gets its own durable copy"
+    ],
+    [
+     "Consumer overwhelmed by traffic bursts",
+     "SQS queue buffer between producer & consumer",
+     "Decouples sides and smooths load"
+    ],
+    [
+     "Repeatedly failing msgs must not be lost",
+     "SQS DLQ with redrive policy",
+     "Isolates poison messages for inspection"
+    ],
+    [
+     "Job rerun created duplicate rows",
+     "Idempotent writes (overwrite/MERGE) or Glue bookmarks",
+     "Ensures safe reprocessing"
+    ],
+    [
+     "Alert when stream consumers fall behind",
+     "CloudWatch alarm on IteratorAgeMilliseconds -> SNS",
+     "Measures stream consumer lag"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Resilient, Fault-Tolerant Pipelines with Alerts (SNS, SQS, DLQs)"
+}

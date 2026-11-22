@@ -1,0 +1,236 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Glue-only DAGs",
+     "name": "Glue workflows",
+     "tag": "AWS Glue",
+     "text": "Chains Glue crawlers/jobs via scheduled, on-demand, conditional (ALL/ANY), or EB triggers. Shares run properties; supports blueprints."
+    },
+    {
+     "keyword": "Event routing",
+     "name": "EventBridge",
+     "tag": "Amazon EventBridge",
+     "text": "Rules route AWS/custom/SaaS events to targets; Scheduler runs cron/rate jobs; Pipes link SQS, Kinesis, DDB Streams, or MSK with filters."
+    },
+    {
+     "keyword": "Anti-pattern",
+     "name": "Lambda chaining",
+     "tag": "AWS Lambda",
+     "text": "Sync chaining adds tight coupling, idle wait cost, 15-min limit, and manual retries. Use Lambda for steps or starting jobs, not waiting."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Glue workflows cannot call non-Glue services (Lambda, EMR, Redshift); use Step Functions or MWAA.",
+    "Least ops overhead for new AWS-only pipelines = Step Functions (not MWAA); avoid EC2 cron (use EventBridge Scheduler).",
+    "S3 Event Notifications cannot start Glue directly; route via EventBridge, Lambda, or a Glue workflow EB trigger.",
+    "Event-driven pipelines must be idempotent because events can be duplicated or arrive out of order."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "heading": "Orchestration vs choreography",
+   "left": {
+    "points": [
+     "Central controller owns the whole flow",
+     "Tracks state, retries, and failures",
+     "Easy to visualize, debug, and audit",
+     "Step Functions, MWAA, Glue workflows"
+    ],
+    "title": "Orchestration"
+   },
+   "right": {
+    "points": [
+     "Services react to events; no central hub",
+     "Loosely coupled and independently scalable",
+     "Harder to trace end to end",
+     "EventBridge rules on S3 / job state changes"
+    ],
+    "title": "Choreography"
+   },
+   "type": "compare"
+  },
+  {
+   "col": "middle",
+   "heading": "Schedule vs event-driven",
+   "left": {
+    "points": [
+     "Cron/rate via Scheduler, Glue, or Airflow",
+     "Simple setup (e.g. daily at 02:00)",
+     "May run empty or miss late data"
+    ],
+    "title": "Schedule-driven"
+   },
+   "right": {
+    "points": [
+     "S3 PUT, streams, or job state changes",
+     "Fresh and efficient as data lands",
+     "Needs idempotency and burst handling"
+    ],
+    "title": "Event-driven"
+   },
+   "type": "compare"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Service",
+    "Serverless",
+    "Scope / Control",
+    "Best for"
+   ],
+   "heading": "Orchestrator comparison",
+   "rows": [
+    [
+     "Glue workflows",
+     "Yes (pay per job)",
+     "Glue-only; basic conditions",
+     "Crawler → job chains"
+    ],
+    [
+     "Step Functions",
+     "Yes",
+     "200+ services; rich retries",
+     "Serverless AWS pipelines"
+    ],
+    [
+     "MWAA",
+     "No (always-on)",
+     "Airflow Python DAGs/operators",
+     "Airflow / complex DAGs"
+    ],
+    [
+     "EventBridge",
+     "Yes",
+     "Event routing; no step state",
+     "Triggers, schedules, alerts"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "col": "right",
+   "edges": [
+    {
+     "from": "s3",
+     "label": "EB rule",
+     "to": "gw"
+    },
+    {
+     "from": "gw",
+     "label": "trigger",
+     "to": "jc"
+    },
+    {
+     "from": "jc",
+     "label": "FAILED",
+     "to": "sns"
+    },
+    {
+     "from": "sched",
+     "label": "cron",
+     "to": "sf"
+    },
+    {
+     "from": "sf",
+     "label": ".sync",
+     "to": "rs"
+    }
+   ],
+   "groups": [
+    {
+     "nodes": [
+      {
+       "id": "s3",
+       "label": "S3 PUT raw/"
+      },
+      {
+       "id": "sched",
+       "label": "EB Scheduler 02:00"
+      }
+     ],
+     "title": "Triggers"
+    },
+    {
+     "nodes": [
+      {
+       "id": "gw",
+       "label": "Glue WF (batch 100)"
+      },
+      {
+       "id": "sf",
+       "label": "Step Functions"
+      }
+     ],
+     "title": "Orchestrators"
+    },
+    {
+     "nodes": [
+      {
+       "id": "jc",
+       "label": "Glue Job → Crawler"
+      },
+      {
+       "id": "sns",
+       "label": "EB Rule → SNS alert"
+      },
+      {
+       "id": "rs",
+       "label": "Glue/Athena → RS API"
+      }
+     ],
+     "title": "Targets & Alerts"
+    }
+   ],
+   "heading": "Orchestration & choreography patterns",
+   "height": 175,
+   "type": "flowchart"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Glue-only crawler + jobs, minimal effort",
+     "Glue workflow + triggers",
+     "Native and simple"
+    ],
+    [
+     "File lands in S3 (or batch N S3 files)",
+     "S3 → EB rule → SFN / Glue WF (batch)",
+     "Event-driven & batching"
+    ],
+    [
+     "Glue, Lambda, Athena, SNS, serverless",
+     "Step Functions",
+     "Central serverless control"
+    ],
+    [
+     "Company standardizes on Airflow",
+     "Amazon MWAA",
+     "Airflow compatibility"
+    ],
+    [
+     "Trigger a Lambda every 15 minutes",
+     "EventBridge Scheduler",
+     "Simplest scheduler"
+    ],
+    [
+     "Notify team when any Glue job fails",
+     "EB rule (Glue State Change) → SNS",
+     "No polling needed"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Choosing an Orchestrator – Glue, EventBridge, Step Functions & MWAA"
+}

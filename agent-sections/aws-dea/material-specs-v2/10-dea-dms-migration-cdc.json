@@ -1,0 +1,232 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Endpoints & tasks",
+     "name": "DMS Components",
+     "tag": "AWS DMS",
+     "text": "Endpoints connect DBs/lakes. Classic uses sized EC2 instances; DMS Serverless auto-scales. Tasks define table mappings & rules."
+    },
+    {
+     "keyword": "Source DB logs",
+     "name": "CDC Log Prereqs",
+     "tag": "AWS DMS",
+     "text": "CDC reads source logs: Oracle redo/supplemental, SQL Server MS-CDC/Replication, MySQL binlog ROW, and PostgreSQL logical replication."
+    },
+    {
+     "keyword": "VPC, latency, COPY",
+     "name": "Operations & Tune",
+     "tag": "AWS DMS, Amazon CloudWatch, Amazon Redshift",
+     "text": "Run in-VPC (SGs/VPN/DX); verify rows with data validation. Watch CDCLatencySource/Target in CloudWatch; Redshift uses S3 COPY."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "DMS moves data only — use DMS Schema Conversion or SCT for schemas and stored procedures.",
+    "CDC not capturing changes usually points to missing source log prereqs (binlog ROW, supplemental, logical).",
+    "Zero-ETL (-> Redshift) beats DMS for supported sources; DMS is not for files (DataSync) or SaaS (AppFlow).",
+    "S3 target writes immutable change files, not mutable tables — a downstream MERGE job (e.g. Iceberg) is required."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Mode",
+    "What it does",
+    "When to use"
+   ],
+   "heading": "Migration types",
+   "rows": [
+    [
+     "Full load",
+     "One-time copy of existing data",
+     "One-time migration; downtime OK"
+    ],
+    [
+     "CDC only",
+     "Replicates ongoing log changes",
+     "Data already pre-loaded"
+    ],
+    [
+     "Full load + CDC",
+     "Initial copy + ongoing sync",
+     "Minimal downtime & lake CDC"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "caption": "Convert schemas and code objects first, then migrate data with DMS.",
+   "col": "middle",
+   "heading": "Homogeneous vs heterogeneous & schema",
+   "left": {
+    "points": [
+     "Same engine (e.g. MySQL -> Aurora MySQL)",
+     "Schema copied as-is without conversion",
+     "DMS homogeneous migrations use native tools"
+    ],
+    "title": "Homogeneous"
+   },
+   "right": {
+    "points": [
+     "Different engines (e.g. Oracle -> Aurora PG)",
+     "DMS Schema Conversion (console): converts schema/code + report",
+     "AWS SCT (desktop): DW sources (Teradata/Netezza -> Redshift)"
+    ],
+    "title": "Heterogeneous & Schema"
+   },
+   "type": "compare"
+  },
+  {
+   "col": "middle",
+   "heading": "DMS to S3 data lake pipeline",
+   "stages": [
+    {
+     "label": "Source DB",
+     "note": "OLTP transaction logs (CDC)"
+    },
+    {
+     "label": "DMS S3 Target",
+     "note": "Parquet, Op I/U/D, DatePartition, KMS"
+    },
+    {
+     "label": "S3 raw/cdc",
+     "note": "Timestamp, Inserts/Updates, immutable"
+    },
+    {
+     "label": "MERGE Job",
+     "note": "Glue, EMR, or Athena"
+    },
+    {
+     "label": "Apache Iceberg",
+     "note": "Queryable lake tables"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "right",
+   "edges": [
+    {
+     "from": "src",
+     "label": "full load+CDC",
+     "to": "dms"
+    },
+    {
+     "from": "src",
+     "label": "assess schema",
+     "to": "sc"
+    },
+    {
+     "from": "dms",
+     "label": "Parquet + Op",
+     "to": "s3"
+    },
+    {
+     "from": "dms",
+     "label": "alt stream",
+     "to": "kds"
+    },
+    {
+     "from": "dms",
+     "label": "CDC sync",
+     "to": "aur"
+    },
+    {
+     "from": "sc",
+     "label": "schema conv",
+     "to": "aur"
+    }
+   ],
+   "groups": [
+    {
+     "nodes": [
+      {
+       "id": "src",
+       "label": "On-prem Oracle / SQL"
+      }
+     ],
+     "title": "Sources"
+    },
+    {
+     "nodes": [
+      {
+       "id": "dms",
+       "label": "AWS DMS / Serverless"
+      },
+      {
+       "id": "sc",
+       "label": "DMS Schema Conversion"
+      }
+     ],
+     "title": "DMS & Schema"
+    },
+    {
+     "nodes": [
+      {
+       "id": "s3",
+       "label": "S3 -> Glue -> Iceberg"
+      },
+      {
+       "id": "kds",
+       "label": "KDS / MSK -> Consumers"
+      },
+      {
+       "id": "aur",
+       "label": "Aurora PostgreSQL"
+      }
+     ],
+     "title": "Targets"
+    }
+   ],
+   "heading": "Architecture & targets",
+   "height": 180,
+   "type": "flowchart"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Oracle -> Aurora PG, minimal downtime",
+     "DMS SC / SCT + DMS full load + CDC",
+     "Heterogeneous schema conv + ongoing sync"
+    ],
+    [
+     "OLTP changes continuously to S3 lake",
+     "DMS CDC -> S3 Parquet -> Iceberg MERGE",
+     "Log-based CDC without app changes"
+    ],
+    [
+     "Stream DB changes to real-time consumers",
+     "DMS -> KDS or MSK",
+     "Real-time fan-out of change events"
+    ],
+    [
+     "Unpredictable load, no instance sizing",
+     "DMS Serverless",
+     "Auto-scaling capacity units"
+    ],
+    [
+     "Aurora MySQL -> Redshift, near real-time",
+     "Aurora zero-ETL with Redshift",
+     "Fully managed, no pipeline to run"
+    ],
+    [
+     "Convert Teradata DW schema to Redshift",
+     "AWS SCT",
+     "Supports data warehouse sources"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "AWS DMS — Full Load, CDC & Schema Conversion"
+}

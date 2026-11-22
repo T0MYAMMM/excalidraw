@@ -1,0 +1,206 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Throttle & spend",
+     "name": "Quotas & cost",
+     "tag": "Amazon Bedrock",
+     "text": "Handle quotas via backoff, SQS/Map concurrency caps, or batch jobs. Cut token cost with lean prompts, caching, and incremental runs."
+    },
+    {
+     "keyword": "Schema & lineage",
+     "name": "Validation & audit",
+     "tag": "AWS Glue Data Quality",
+     "text": "Request JSON output, validate with schema and Glue DQ rules, and route failures to review. Log model ID, prompt version, and timestamp."
+    },
+    {
+     "keyword": "No prompt training",
+     "name": "Security & privacy",
+     "tag": "AWS PrivateLink, IAM, KMS",
+     "text": "Bedrock never trains base models on your prompts. Use PrivateLink endpoints, model-ARN IAM, KMS, and PII masking or Guardrails."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "heading": "Exam tips & traps",
+   "items": [
+    "Choose managed Bedrock APIs over training, fine-tuning, or self-hosting LLMs on EC2 GPUs (distractors).",
+    "Always validate LLM JSON outputs with schema or DQ checks before writing to trusted tables.",
+    "Fix Bedrock throttling via backoff/retries, concurrency limits (SQS/Map), or batch inference.",
+    "Protect PII with PrivateLink endpoints, least-privilege IAM, and upstream masking or Guardrails."
+   ],
+   "type": "tips"
+  },
+  {
+   "caption": "Managed API access to foundation models; pair sync/batch inference with Step Functions, RAG & Guardrails.",
+   "col": "middle",
+   "heading": "Bedrock in a data pipeline",
+   "top": "Amazon Bedrock (Managed FMs)",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "InvokeModel / Converse",
+      "Lambda, Glue, ECS, SF"
+     ],
+     "title": "Sync APIs"
+    },
+    {
+     "items": [
+      "Async S3 JSONL in/out",
+      "Cheaper, no rate mgmt"
+     ],
+     "title": "Batch Inference"
+    },
+    {
+     "items": [
+      "Native Bedrock state",
+      "Map & Distributed Map"
+     ],
+     "title": "Step Functions"
+    },
+    {
+     "items": [
+      "Knowledge bases (RAG)",
+      "Content & PII filter"
+     ],
+     "title": "RAG & Guardrails"
+    }
+   ]
+  },
+  {
+   "col": "middle",
+   "columns": [
+    "Task",
+    "Example"
+   ],
+   "heading": "What LLMs do well",
+   "rows": [
+    [
+     "Extraction",
+     "Pull invoice #, vendor, total from emails/OCR into JSON"
+    ],
+    [
+     "Classification",
+     "Route support tickets by topic; label review sentiment"
+    ],
+    [
+     "Normalize / Summ.",
+     "Standardize addresses/names; summarize call transcripts"
+    ],
+    [
+     "Enrich & Embed",
+     "Catalog tags/descriptions; text vectors for search & RAG"
+    ],
+    [
+     "Amazon Q (Dev)",
+     "Assists engineers: generative SQL & ETL/notebook (SM Studio)"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "branch": {
+    "from": 4,
+    "label": "invalid",
+    "target": "SQS review queue"
+   },
+   "col": "middle",
+   "heading": "Near-real-time enrichment",
+   "stages": [
+    {
+     "label": "S3",
+     "note": "New support tickets"
+    },
+    {
+     "label": "EventBridge",
+     "note": "Triggers workflow"
+    },
+    {
+     "label": "Step Functions",
+     "note": "Orchestrates enrichment"
+    },
+    {
+     "label": "Bedrock InvokeModel",
+     "note": "Classify & extract JSON"
+    },
+    {
+     "label": "Lambda",
+     "note": "Validate JSON schema"
+    },
+    {
+     "label": "DynamoDB / S3",
+     "note": "Valid -> curated store"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "right",
+   "heading": "Large backfill (batch)",
+   "stages": [
+    {
+     "label": "Glue -> S3 (JSONL)",
+     "note": "Write prompts with recordId"
+    },
+    {
+     "label": "Bedrock Batch Job",
+     "note": "Async S3 in/out prefixes"
+    },
+    {
+     "label": "EventBridge / SF",
+     "note": "Detect job completion"
+    },
+    {
+     "label": "Glue -> Parquet",
+     "note": "Join by ID, validate, write"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "col": "right",
+   "heading": "Decision guide",
+   "rows": [
+    [
+     "Millions of docs, non-urgent, lowest cost",
+     "Bedrock batch inference (S3)",
+     "Async, cheaper, no rate management"
+    ],
+    [
+     "Enrich each new record within seconds",
+     "Lambda / Step Functions + on-demand",
+     "Synchronous per-record inference"
+    ],
+    [
+     "LLM over 1000s of S3 files with retries",
+     "Step Functions Distributed Map + Bedrock",
+     "Parallelism, retries, no glue code"
+    ],
+    [
+     "Doc Q&A (RAG) / enterprise search",
+     "Knowledge Bases / Amazon Kendra",
+     "Managed RAG vs search w/ connectors"
+    ],
+    [
+     "Generate SQL from natural language",
+     "Amazon Q (editors / SageMaker Studio)",
+     "Generative SQL assistance"
+    ],
+    [
+     "Prevent PII in prompts and responses",
+     "Bedrock Guardrails + upstream masking",
+     "Sensitive info filters & redaction"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Integrating LLMs into Data Pipelines with Amazon Bedrock"
+}

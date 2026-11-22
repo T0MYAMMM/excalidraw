@@ -1,0 +1,232 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Fargate, EC2, Spot",
+     "name": "Launch & Sizing",
+     "tag": "Amazon ECS, Amazon EKS, AWS Fargate",
+     "text": "Fargate avoids server ops; EC2 cuts steady-load cost & adds GPUs. Right-size via Container Insights; use Spot for interruptible batch."
+    },
+    {
+     "keyword": "ECR, Scaling, Batch",
+     "name": "Images & Scaling",
+     "tag": "Amazon ECR, AWS Batch",
+     "text": "Use slim ECR images with scanning. Auto-scale ECS on SQS depth, EKS via HPA + Karpenter/CA; use Batch for queued, dependent jobs."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "heading": "Cost levers (skill 1.2.4)",
+   "left_title": "Cost lever",
+   "pairs": [
+    [
+     "Process less data",
+     "Pruning, columnar, pushdown"
+    ],
+    [
+     "Cheaper model",
+     "Glue Flex, Spot, Graviton"
+    ],
+    [
+     "Right-size & scale",
+     "Glue/EMR scaling, transient"
+    ],
+    [
+     "Avoid idle capacity",
+     "Serverless for spiky loads"
+    ],
+    [
+     "Use SQL where it fits",
+     "Redshift ELT / Athena CTAS"
+    ]
+   ],
+   "right_title": "Technique",
+   "type": "pairs"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Lambda trap: move jobs >15 min or large joins to Glue or EMR.",
+    "EMR beats Glue for HBase, Trino, Flink, custom AMIs, or heavy Spot; else Glue wins on least overhead.",
+    "Containers on the exam = ECS/EKS on Fargate (less ops) or EC2 capacity providers (cost at scale).",
+    "Never self-manage Spark on raw EC2 instances."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "edges": [
+    {
+     "from": "start",
+     "label": "MBs/event",
+     "to": "lambda"
+    },
+    {
+     "from": "start",
+     "label": "Redshift",
+     "to": "redshift"
+    },
+    {
+     "from": "start",
+     "label": "Containers",
+     "to": "containers"
+    },
+    {
+     "from": "start",
+     "label": "GBs-TBs",
+     "to": "control"
+    },
+    {
+     "from": "control",
+     "label": "no",
+     "to": "glue"
+    },
+    {
+     "from": "control",
+     "label": "yes",
+     "to": "clusters"
+    },
+    {
+     "from": "clusters",
+     "label": "yes",
+     "to": "emr_ec2"
+    },
+    {
+     "from": "clusters",
+     "label": "no",
+     "to": "emr_sl"
+    }
+   ],
+   "heading": "Choosing compute",
+   "nodes": [
+    {
+     "id": "start",
+     "kind": "start",
+     "label": "Workload size & type?"
+    },
+    {
+     "id": "lambda",
+     "kind": "end",
+     "label": "AWS Lambda"
+    },
+    {
+     "id": "redshift",
+     "kind": "end",
+     "label": "Redshift SQL ELT"
+    },
+    {
+     "id": "containers",
+     "kind": "end",
+     "label": "ECS/EKS or AWS Batch"
+    },
+    {
+     "id": "control",
+     "kind": "decision",
+     "label": "Need control, Spot, HBase, Trino, Flink?"
+    },
+    {
+     "id": "glue",
+     "kind": "end",
+     "label": "AWS Glue"
+    },
+    {
+     "id": "clusters",
+     "kind": "decision",
+     "label": "Manage clusters?"
+    },
+    {
+     "id": "emr_ec2",
+     "kind": "end",
+     "label": "EMR on EC2"
+    },
+    {
+     "id": "emr_sl",
+     "kind": "end",
+     "label": "EMR Serverless"
+    }
+   ],
+   "type": "decision_tree"
+  },
+  {
+   "caption": "Spark (Glue, EMR EC2/Serverless/EKS), Event (Lambda), SQL ELT (Redshift, Athena), Containers (ECS/EKS, Batch)",
+   "col": "right",
+   "heading": "Compute candidates",
+   "top": "9 Transformation Candidates",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "Glue: DPU-s, Flex",
+      "EMR EC2: Spot, custom",
+      "EMR Serverless / EKS"
+     ],
+     "title": "Spark"
+    },
+    {
+     "items": [
+      "Lambda: ms billing",
+      "15m, 10GB RAM & /tmp"
+     ],
+     "title": "Event"
+    },
+    {
+     "items": [
+      "Redshift: DW SQL/MVs",
+      "Athena: CTAS per TB"
+     ],
+     "title": "SQL ELT"
+    },
+    {
+     "items": [
+      "ECS/EKS: Fargate/EC2",
+      "AWS Batch: job queues"
+     ],
+     "title": "Containers"
+    }
+   ]
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Serverless Spark (least ops) or non-urgent nightly",
+     "AWS Glue / Glue Flex",
+     "Managed Spark + Catalog; Flex cuts nightly cost"
+    ],
+    [
+     "Existing Hadoop/Spark, custom config, Spot savings",
+     "EMR on EC2 (Spot task nodes)",
+     "Full framework control + Spot cost savings"
+    ],
+    [
+     "Serverless EMR runtime, or K8s standardization",
+     "EMR Serverless / EMR on EKS",
+     "No clusters (Serverless) or shared EKS (K8s)"
+    ],
+    [
+     "Transform each small JSON file as it lands",
+     "AWS Lambda",
+     "Event-driven, cheap for small payloads"
+    ],
+    [
+     "Data already in Redshift; build aggregates",
+     "Redshift SQL / procs / MVs",
+     "In-warehouse ELT without moving data"
+    ],
+    [
+     "Thousands of containerized jobs with dependencies",
+     "AWS Batch",
+     "Managed job queues, retries, and scheduling"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Choosing Compute: Glue, EMR, Lambda, Redshift, Containers, Batch"
+}
