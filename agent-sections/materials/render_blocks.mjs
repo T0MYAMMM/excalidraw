@@ -758,7 +758,11 @@ export const renderBlocks = (scene, row, spec) => {
     );
     addElements(
       scene.elements,
-      blk.inputs.map(({ _font, ...rest }) => rest),
+      blk.inputs.map((input) => {
+        const rest = { ...input };
+        delete rest._font;
+        return rest;
+      }),
     );
     const fresh = scene.elements.slice(start);
     const inner = newId();
