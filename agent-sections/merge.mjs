@@ -9,6 +9,9 @@ import { join, resolve } from "node:path";
 const M = resolve(import.meta.dirname, "../mcp-server");
 const { createClient } = await import(join(M, "client.mjs"));
 const { addElements } = await import(join(M, "elements.mjs"));
+const { groupSections } = await import(
+  join(import.meta.dirname, "group_sections.mjs")
+);
 
 const [setDir, target] = process.argv.slice(2);
 const dryRun = process.argv.includes("--dry-run");
@@ -108,6 +111,7 @@ const edit = (scene) => {
     })),
   );
   scene.elements.push(...headings, ...added);
+  groupSections(scene.elements); // each section moves as one
   return {
     sections: sections.length,
     elements: added.length + headings.length,

@@ -33,7 +33,8 @@ node merge.mjs aws-dea aws-data-engineer-associate --dry-run          # then wit
   Exam Tips & Traps), arrows attached at both ends, labels that fit, no
   overlapping text, no literal `\n`. Text width is estimated at 0.5 × font
   size per character, calibrated on the approved Kinesis section.
-- `merge.mjs` places sections in columns (`layout.json`), adds column
+- `merge.mjs` places sections in columns (`layout.json`), groups each
+  section (`group_sections.mjs`) so it moves as one, adds column
   headings, and writes the target with a version check (`If-Match`). Back up
   the target drawing first.
 
