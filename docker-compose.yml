@@ -13,27 +13,24 @@ services:
       disable: true
     environment:
       - NODE_ENV=development
-    volumes:
-      # serves the app and forwards /api/ to file-server
-      - ./file-server/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    # nginx.conf (serves the app, forwards /api/) is baked into the image, so
+    # this container doesn't depend on a WSL folder being mounted at boot
     depends_on:
       - file-server
       - rembg
 
   # Stores drawings as <name>.excalidraw files in DRAWINGS_DIR (default ~/drawings).
-  # Create the folder before the first start so it is owned by you, not root.
+  # The folder must contain an empty `.drawings-root` file: the server won't
+  # start without it (protects against an unmounted folder after a reboot).
   file-server:
-    image: node:22-alpine
+    build: ./file-server
     container_name: excalidraw-files
     restart: unless-stopped
     user: "1000:1000"
-    working_dir: /app
-    command: ["node", "server.mjs"]
     environment:
       - DATA_DIR=/data
       - PORT=8080
     volumes:
-      - ./file-server:/app:ro
       - ${DRAWINGS_DIR:-~/drawings}:/data
 
   # Background removal for images (context menu > Remove background).

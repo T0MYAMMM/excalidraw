@@ -34,6 +34,8 @@ import { join } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 
 const EXTENSION = ".excalidraw";
+/** File that marks the real drawings folder (see the startup check). */
+export const MARKER = ".drawings-root";
 const MAX_BODY_BYTES = 50 * 1024 * 1024;
 const MAX_NAME_LENGTH = 100;
 
@@ -293,7 +295,19 @@ const isMain = import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
   const dataDir = process.env.DATA_DIR || "/data";
   const port = Number(process.env.PORT || 8080);
-  await mkdir(dataDir, { recursive: true });
+  // Refuse to start unless the real drawings folder is mounted. After a
+  // reboot Docker can start this container before WSL exposes ~/drawings;
+  // the mount is then an empty stand-in and anything saved there is lost.
+  // Exiting makes Docker retry until the folder (with its marker) is there.
+  if (!(await exists(join(dataDir, MARKER)))) {
+    console.error(
+      `file-server: ${join(
+        dataDir,
+        MARKER,
+      )} not found; drawings folder not mounted yet`,
+    );
+    process.exit(1);
+  }
   createServer(createHandler(dataDir)).listen(port, () => {
     // eslint-disable-next-line no-console
     console.log(`file-server: serving ${dataDir} on :${port}`);
