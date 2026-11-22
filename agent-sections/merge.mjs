@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- CLI script that reports to stdout */
 // Merges the validated sections of a set into a target drawing, one column
 // per services.json "col", each section's box behind its own content.
 // Usage: node merge.mjs <set-dir> <target-drawing> [--dry-run]
@@ -22,7 +23,9 @@ const DRAWINGS = `${process.env.HOME}/drawings`;
 const SRC_BOX = { x: 5575, y: -9590 }; // where agents draw each section
 
 const missing = services.filter((s) => !passed.has(s.slug)).map((s) => s.slug);
-if (missing.length) throw new Error(`not validated: ${missing.join(", ")}`);
+if (missing.length) {
+  throw new Error(`not validated: ${missing.join(", ")}`);
+}
 
 const nextRow = [...layout.firstRow];
 const sections = services.map((s) => {
@@ -55,11 +58,17 @@ const prepare = ({ slug, col, row, elements }, taken) => {
     c.x += dx;
     c.y += dy;
     c.index = null; // the editor assigns fresh fractional indices
-    if (c.containerId) c.containerId = map(c.containerId);
-    if (c.boundElements)
+    if (c.containerId) {
+      c.containerId = map(c.containerId);
+    }
+    if (c.boundElements) {
       c.boundElements = c.boundElements.map((b) => ({ ...b, id: map(b.id) }));
-    for (const k of ["startBinding", "endBinding"])
-      if (c[k]) c[k] = { ...c[k], elementId: map(c[k].elementId) };
+    }
+    for (const k of ["startBinding", "endBinding"]) {
+      if (c[k]) {
+        c[k] = { ...c[k], elementId: map(c[k].elementId) };
+      }
+    }
     return c;
   });
   const box = out.find(
@@ -72,13 +81,16 @@ const prepare = ({ slug, col, row, elements }, taken) => {
 };
 
 const edit = (scene) => {
-  if (scene.elements.some((e) => e.id === "svc-heading-0" && !e.isDeleted))
+  if (scene.elements.some((e) => e.id === "svc-heading-0" && !e.isDeleted)) {
     throw new Error("already merged");
+  }
   const taken = new Set(scene.elements.map((e) => e.id));
   const added = [];
   for (const s of sections) {
     for (const e of prepare(s, taken)) {
-      if (taken.has(e.id)) throw new Error(`duplicate id ${e.id}`);
+      if (taken.has(e.id)) {
+        throw new Error(`duplicate id ${e.id}`);
+      }
       taken.add(e.id);
       added.push(e);
     }
