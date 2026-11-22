@@ -42,7 +42,18 @@ their own colours (e.g. the teal/mint cards in service sections).
 
 ## Materials
 
-- Filling a material from its lesson: an agy agent writes a spec
+- Materials must not all look alike. Each lesson gets a design brief
+  (`aws-dea/material-briefs.json`) that picks the visual blocks fitting its
+  content: concepts, callouts (key numbers), compare (side by side), timeline
+  (marks or window lanes), pipeline (with error branch), decision_tree,
+  pairs (term mapping), cluster, flowchart, table, decisions, tips
+  (`materials/blocks.schema.json`). Keep concepts + tips (left) and the
+  decision guide (right) as anchors; choose the rest per lesson.
+  `materials/agy_block_specs.py` has an agent fill the brief from the lesson;
+  `materials/render_blocks.mjs` stacks the blocks in three columns and scales
+  the text (0.78-1.3x) so the material fills its box. Specs:
+  `aws-dea/material-specs-v2/`.
+- Older single-layout pipeline (kept for reference): an agy agent writes a spec
   (`materials/agy_material_specs.py`, schema `materials/spec.schema.json`, every
   field length-limited so the result stays concise), then
   `materials/render_set.mjs` draws it in the standard layout: left = title,

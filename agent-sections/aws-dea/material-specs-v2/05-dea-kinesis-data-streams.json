@@ -1,0 +1,228 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Shard limits",
+   "items": [
+    {
+     "label": "Write / shard (1,000 rec/s)",
+     "value": "1 MB/s"
+    },
+    {
+     "label": "Shared read / shard",
+     "value": "2 MB/s"
+    },
+    {
+     "label": "EFO / shard / consumer",
+     "value": "2 MB/s"
+    },
+    {
+     "label": "Retention (24h default)",
+     "value": "24h–365d"
+    }
+   ],
+   "type": "callouts"
+  },
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Order per shard",
+     "name": "Partition Key",
+     "tag": "Amazon Kinesis Data Streams",
+     "text": "MD5-hashed to pick a shard; order is guaranteed only within a shard. Low-cardinality keys cause hot shards and write throttling."
+    },
+    {
+     "keyword": "Batch & aggregate",
+     "name": "Producers",
+     "tag": "Amazon Kinesis Data Streams",
+     "text": "SDK PutRecords batches up to 500 records/call. KPL batches, aggregates small records, and retries automatically with slight latency."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "On-demand fits unpredictable traffic; provisioned needs shard mgmt.",
+    "KDS never writes to S3 directly; use Firehose, Lambda, or KCL.",
+    "Adding shared consumers adds no read capacity; use EFO instead.",
+    "Rising IteratorAgeMilliseconds means consumers lag; scale consumers."
+   ],
+   "type": "tips"
+  },
+  {
+   "caption": "Use EFO for >2–3 consumers or when low latency and dedicated throughput are needed.",
+   "col": "middle",
+   "heading": "Shared vs enhanced fan-out",
+   "left": {
+    "points": [
+     "2 MB/s per shard shared by all",
+     "Pull via GetRecords (max 5 calls/s)",
+     "~200 ms+ latency; degrades with consumers"
+    ],
+    "title": "Shared throughput"
+   },
+   "right": {
+    "points": [
+     "2 MB/s per shard per consumer",
+     "Push over HTTP/2 (SubscribeToShard)",
+     "~70 ms low latency"
+    ],
+    "title": "Enhanced fan-out (EFO)"
+   },
+   "type": "compare"
+  },
+  {
+   "axis_end": "Max retention",
+   "axis_start": "Record written",
+   "col": "middle",
+   "heading": "Retention and replay",
+   "marks": [
+    {
+     "at": 0,
+     "label": "LATEST"
+    },
+    {
+     "at": 0.25,
+     "label": "24h default"
+    },
+    {
+     "at": 0.5,
+     "label": "7 days"
+    },
+    {
+     "at": 0.75,
+     "label": "AT_TIMESTAMP"
+    },
+    {
+     "at": 1,
+     "label": "365d / TRIM_HORIZON"
+    }
+   ],
+   "type": "timeline"
+  },
+  {
+   "col": "right",
+   "edges": [
+    {
+     "from": "sdk",
+     "label": "PutRecords",
+     "to": "stream"
+    },
+    {
+     "from": "agent",
+     "label": "logs",
+     "to": "stream"
+    },
+    {
+     "from": "iot",
+     "label": "events",
+     "to": "stream"
+    },
+    {
+     "from": "stream",
+     "label": "pull / EFO",
+     "to": "lambda"
+    },
+    {
+     "from": "stream",
+     "label": "to S3",
+     "to": "firehose"
+    },
+    {
+     "from": "stream",
+     "label": "EFO push",
+     "to": "flink"
+    }
+   ],
+   "groups": [
+    {
+     "nodes": [
+      {
+       "id": "sdk",
+       "label": "SDK / KPL"
+      },
+      {
+       "id": "agent",
+       "label": "Kinesis Agent"
+      },
+      {
+       "id": "iot",
+       "label": "DynamoDB / IoT"
+      }
+     ],
+     "title": "Producers"
+    },
+    {
+     "nodes": [
+      {
+       "id": "stream",
+       "label": "KDS Shards"
+      }
+     ],
+     "title": "Stream"
+    },
+    {
+     "nodes": [
+      {
+       "id": "lambda",
+       "label": "Lambda / KCL"
+      },
+      {
+       "id": "firehose",
+       "label": "Firehose -> S3"
+      },
+      {
+       "id": "flink",
+       "label": "Flink / Glue"
+      }
+     ],
+     "title": "Consumers"
+    }
+   ],
+   "heading": "Fan-in and fan-out",
+   "height": 170,
+   "type": "flowchart"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Custom real-time, multiple consumers, replay",
+     "Kinesis Data Streams",
+     "Durable, ordered, replayable stream"
+    ],
+    [
+     "Several consumers need full throughput & low latency",
+     "Enhanced fan-out (EFO)",
+     "Dedicated 2 MB/s per shard per consumer"
+    ],
+    [
+     "Unpredictable traffic, no capacity planning",
+     "On-demand mode",
+     "Scales automatically; pay per GB"
+    ],
+    [
+     "Steady, known throughput at lowest cost",
+     "Provisioned mode",
+     "Pay per shard-hour"
+    ],
+    [
+     "Writes throttled while other shards idle",
+     "Better partition key",
+     "Fixes hot shard from low-cardinality key"
+    ],
+    [
+     "Deliver to S3/Redshift/OpenSearch, no custom code",
+     "Amazon Data Firehose",
+     "No consumer code to run"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Amazon Kinesis Data Streams — Shards, Capacity, Consumers & Replay"
+}

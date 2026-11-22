@@ -1,0 +1,42 @@
+{
+ "_note": "Per-material design: the blocks (type, column, heading) each lesson uses, in stacking order. Agents fill only these blocks. Anchors on every material: concepts + tips (left), decisions (right).",
+ "4": {"lesson": "dea-distributed-computing-concepts", "blocks": [
+   {"type": "concepts", "col": "left", "heading": "Core Concepts", "count": 3},
+   {"type": "tips", "col": "left"},
+   {"type": "cluster", "col": "middle", "heading": "Spark: driver and executors", "why": "show how one job is split into tasks over partitions on executors"},
+   {"type": "compare", "col": "middle", "heading": "Narrow vs wide transformations", "why": "left = narrow (no shuffle), right = wide (shuffle); points in plain words"},
+   {"type": "table", "col": "right", "heading": "Data structures to recognize", "why": "the lesson's data-structure table, 4-5 rows"},
+   {"type": "decisions", "col": "right"}
+ ]},
+ "5": {"lesson": "dea-kinesis-data-streams", "blocks": [
+   {"type": "callouts", "col": "left", "heading": "Shard limits", "count": 4, "why": "the key numbers: write per shard, read per shard, EFO per consumer, retention"},
+   {"type": "concepts", "col": "left", "heading": "Core Concepts", "count": 2, "why": "partition key / hot shards and producers (KPL, PutRecords)"},
+   {"type": "tips", "col": "left"},
+   {"type": "compare", "col": "middle", "heading": "Shared vs enhanced fan-out", "why": "left = shared throughput, right = enhanced fan-out"},
+   {"type": "timeline", "col": "middle", "heading": "Retention and replay", "why": "axis from record written to max retention, marks for 24 h default, 7 days, 365 days and replay positions (TRIM_HORIZON, AT_TIMESTAMP, LATEST); no lanes"},
+   {"type": "flowchart", "col": "right", "heading": "Fan-in and fan-out", "height": 170, "why": "producers -> stream -> consumers, 3 groups"},
+   {"type": "decisions", "col": "right"}
+ ]},
+ "6": {"lesson": "dea-amazon-data-firehose", "blocks": [
+   {"type": "concepts", "col": "left", "heading": "Core Concepts", "count": 3},
+   {"type": "tips", "col": "left"},
+   {"type": "pipeline", "col": "middle-right", "heading": "Delivery pipeline", "why": "5-6 stages left to right from source through buffering, transform, format conversion, dynamic partitioning to destinations; branch from the transform or delivery stage to the S3 error/backup prefix"},
+   {"type": "compare", "col": "middle", "heading": "Firehose vs Kinesis Data Streams", "why": "left = Firehose, right = KDS"},
+   {"type": "decisions", "col": "right"}
+ ]},
+ "7": {"lesson": "dea-msk-and-flink", "blocks": [
+   {"type": "concepts", "col": "left", "heading": "Core Concepts", "count": 3},
+   {"type": "tips", "col": "left"},
+   {"type": "pairs", "col": "middle", "heading": "Kafka ↔ Kinesis vocabulary", "why": "left = Kafka term, right = Kinesis equivalent"},
+   {"type": "compare", "col": "middle", "heading": "MSK Provisioned vs Serverless", "why": "left = Provisioned, right = Serverless"},
+   {"type": "timeline", "col": "right", "heading": "Flink window types", "why": "3 lanes: Tumbling (back-to-back fixed bars), Sliding (overlapping bars), Session (bars separated by gaps of inactivity); axis = event time; no marks or at most 1"},
+   {"type": "decisions", "col": "right"}
+ ]},
+ "8": {"lesson": "dea-stream-processing-lambda", "blocks": [
+   {"type": "concepts", "col": "left", "heading": "Core Concepts", "count": 3},
+   {"type": "tips", "col": "left"},
+   {"type": "decision_tree", "col": "middle", "heading": "When a batch fails", "why": "start: batch invoked -> decision: function error? -> no: checkpoint & next batch; yes: bisect enabled? -> split batch / retry whole batch -> decision: retries or record age left? -> retry; else -> on-failure destination, continue; 6-9 nodes"},
+   {"type": "callouts", "col": "right", "heading": "ESM knobs", "count": 4, "why": "batch size, batching window, parallelization factor, retries/age"},
+   {"type": "decisions", "col": "right"}
+ ]}
+}

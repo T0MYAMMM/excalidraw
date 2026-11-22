@@ -1,0 +1,133 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Near real time",
+     "name": "Serverless Pipe",
+     "tag": "Amazon Data Firehose",
+     "text": "Fully managed with no shards to provision; auto-scales and bills by ingested volume. No replay and no multiple consumers."
+    },
+    {
+     "keyword": "Size or time hint",
+     "name": "Buffering",
+     "tag": "Amazon S3",
+     "text": "Batches records until a size or time hint is met (seconds to minutes). Larger buffers make bigger S3 files; smaller buffers lower latency."
+    },
+    {
+     "keyword": "In-flight ETL",
+     "name": "In-Flight ETL",
+     "tag": "AWS Lambda, AWS Glue Data Catalog",
+     "text": "Runs Lambda transforms, converts JSON to Parquet/ORC via a Glue table schema, and builds Hive-style S3 prefixes with dynamic partitioning."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "heading": "Exam Tips & Traps",
+   "items": [
+    "Near real time only (buffering) — sub-second or ms latency means Firehose alone is a trap.",
+    "Format conversion needs JSON input + Glue Data Catalog table; convert CSV via Lambda first.",
+    "No replay and no multiple consumers — pair Kinesis Data Streams with Firehose for those.",
+    "Small buffers make many small S3 files (hurts Athena); Redshift always stages via S3 COPY."
+   ],
+   "type": "tips"
+  },
+  {
+   "branch": {
+    "from": 2,
+    "label": "errors / backup",
+    "target": "S3 error prefix"
+   },
+   "col": "middle-right",
+   "heading": "Delivery pipeline",
+   "stages": [
+    {
+     "label": "Sources"
+    },
+    {
+     "label": "Buffering"
+    },
+    {
+     "label": "Transform"
+    },
+    {
+     "label": "Format Convert"
+    },
+    {
+     "label": "Dyn. Partition"
+    },
+    {
+     "label": "Destinations"
+    }
+   ],
+   "type": "pipeline"
+  },
+  {
+   "caption": "Pair KDS -> Firehose for real-time alerts/replay plus managed S3 archive.",
+   "col": "middle",
+   "heading": "Firehose vs Kinesis Data Streams",
+   "left": {
+    "points": [
+     "Serverless; auto-scales, no shards",
+     "Near real time (buffered sec-min)",
+     "Built-in Lambda, Parquet/ORC, dyn. partitioning",
+     "No replay; single managed delivery pipe"
+    ],
+    "title": "Firehose"
+   },
+   "right": {
+    "points": [
+     "Shard-based streaming log",
+     "Real-time / sub-second processing",
+     "Multiple custom consumers",
+     "Replay supported; can feed Firehose"
+    ],
+    "title": "Kinesis Data Streams"
+   },
+   "type": "compare"
+  },
+  {
+   "col": "right",
+   "heading": "Decision Guide",
+   "rows": [
+    [
+     "Stream to S3, least ops overhead",
+     "Firehose",
+     "Serverless, no consumer code"
+    ],
+    [
+     "Convert JSON to Parquet in flight",
+     "Firehose + Glue table",
+     "Built in, no ETL job"
+    ],
+    [
+     "Partition S3 by payload field",
+     "Dynamic partitioning",
+     "Prefixes from record content"
+    ],
+    [
+     "Sub-second, replay, multi-consumer",
+     "Kinesis Data Streams",
+     "Firehose buffers, no replay"
+    ],
+    [
+     "Mask field or convert CSV to JSON",
+     "Firehose + Lambda",
+     "Per-record stateless transform"
+    ],
+    [
+     "Windowed stream aggregations",
+     "Managed Apache Flink",
+     "Stateful stream processing"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Amazon Data Firehose – Managed Delivery & Format Conversion"
+}

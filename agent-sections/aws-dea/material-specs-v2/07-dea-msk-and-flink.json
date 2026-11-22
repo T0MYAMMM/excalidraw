@@ -1,0 +1,208 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Managed Kafka",
+     "name": "Amazon MSK",
+     "tag": "Amazon MSK",
+     "text": "Managed Apache Kafka in your VPC with TLS, KMS, and IAM/mTLS/SCRAM auth. Offloads broker patching and ZooKeeper/KRaft."
+    },
+    {
+     "keyword": "Managed Connectors",
+     "name": "MSK Connect",
+     "tag": "Amazon MSK Connect",
+     "text": "Managed Kafka Connect workers for source and sink connectors, such as Debezium CDC and S3 sinks, with no cluster to run."
+    },
+    {
+     "keyword": "Stateful Streams",
+     "name": "Apache Flink",
+     "tag": "Managed Service for Apache Flink",
+     "text": "Formerly Kinesis Data Analytics. Runs stateful streams with windows, joins, event-time watermarks, and exactly-once checkpoints."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Pick MSK only when Kafka is required; else KDS has less ops overhead.",
+    "Flink is not delivery; Firehose is not stateful — watch for swaps.",
+    "Kinesis Data Analytics is the old name for Managed Apache Flink.",
+    "MSK lives in your VPC; Lambda, Glue, and EMR need SG access."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "heading": "Kafka ↔ Kinesis vocabulary",
+   "left_title": "Kafka",
+   "pairs": [
+    [
+     "Broker",
+     "AWS-managed (KDS)"
+    ],
+    [
+     "Topic",
+     "Stream"
+    ],
+    [
+     "Partition",
+     "Shard"
+    ],
+    [
+     "Key",
+     "Partition key"
+    ],
+    [
+     "Consumer group",
+     "KCL application"
+    ],
+    [
+     "Offset",
+     "Sequence / checkpoint"
+    ]
+   ],
+   "right_title": "Kinesis",
+   "type": "pairs"
+  },
+  {
+   "caption": "Both deploy into your VPC with native Kafka APIs.",
+   "col": "middle",
+   "heading": "MSK Provisioned vs Serverless",
+   "left": {
+    "points": [
+     "Choose broker types, count & EBS",
+     "Full Kafka config; Express brokers",
+     "Tiered storage for long retention",
+     "Requires capacity planning"
+    ],
+    "title": "Provisioned"
+   },
+   "right": {
+    "points": [
+     "No broker sizing or cluster mgmt",
+     "Automatic capacity scaling",
+     "Pay for throughput & partitions",
+     "IAM auth; least ops effort"
+    ],
+    "title": "Serverless"
+   },
+   "type": "compare"
+  },
+  {
+   "axis_end": "Event time →",
+   "axis_start": "t0",
+   "col": "right",
+   "heading": "Flink window types",
+   "lanes": [
+    {
+     "bars": [
+      [
+       0,
+       0.25
+      ],
+      [
+       0.25,
+       0.5
+      ],
+      [
+       0.5,
+       0.75
+      ],
+      [
+       0.75,
+       1
+      ]
+     ],
+     "name": "Tumbling"
+    },
+    {
+     "bars": [
+      [
+       0,
+       0.4
+      ],
+      [
+       0.2,
+       0.6
+      ],
+      [
+       0.4,
+       0.8
+      ],
+      [
+       0.6,
+       1
+      ]
+     ],
+     "name": "Sliding"
+    },
+    {
+     "bars": [
+      [
+       0,
+       0.22
+      ],
+      [
+       0.38,
+       0.65
+      ],
+      [
+       0.82,
+       0.98
+      ]
+     ],
+     "name": "Session"
+    }
+   ],
+   "marks": [
+    {
+     "at": 0.72,
+     "label": "Watermark"
+    }
+   ],
+   "type": "timeline"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Existing Kafka apps, minimal changes",
+     "Amazon MSK",
+     "Native Kafka APIs"
+    ],
+    [
+     "Kafka without broker sizing",
+     "MSK Serverless",
+     "Automatic capacity"
+    ],
+    [
+     "Stream DB changes into Kafka",
+     "MSK Connect + Debezium",
+     "Managed Kafka Connect"
+    ],
+    [
+     "Windows, joins, exactly-once, event time",
+     "Managed Apache Flink",
+     "Stateful processing"
+    ],
+    [
+     "Deliver MSK data to S3 with no code",
+     "Firehose (MSK source)",
+     "Managed delivery"
+    ],
+    [
+     "Cheap very long stream retention",
+     "MSK tiered storage",
+     "Low-cost storage tier"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Amazon MSK & Managed Service for Apache Flink"
+}

@@ -1,0 +1,151 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Horizontal scaling",
+     "name": "Scale Out & Shard",
+     "tag": "Kinesis, DynamoDB, Redshift",
+     "text": "Add nodes and split data into partitions or shards so each node processes its share in parallel."
+    },
+    {
+     "keyword": "Avoid shuffles",
+     "name": "Data Locality",
+     "tag": "AWS Glue, Amazon EMR",
+     "text": "Move compute to data because network shuffles are costly. Filter early and broadcast small tables."
+    },
+    {
+     "keyword": "Lineage & replicas",
+     "name": "Fault Tolerance",
+     "tag": "Amazon EMR, AWS Glue",
+     "text": "Failed nodes retry elsewhere. Spark recomputes lost partitions from lineage; HDFS replicates blocks."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Scale up rarely fixes skew or many small files.",
+    "Neptune is the graph answer; avoid deep traversals in DynamoDB or RDS.",
+    "A DAG cannot have cycles; retries use retry policies, not cyclic edges.",
+    "Shuffles are the main cost; Redshift distribution keys colocate joined rows."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "heading": "Spark: driver and executors",
+   "top": "Driver (plans job & stages)",
+   "type": "cluster",
+   "workers": [
+    {
+     "items": [
+      "Tasks: part 1-166",
+      "Tasks: part 167-333"
+     ],
+     "title": "Executor 1"
+    },
+    {
+     "items": [
+      "Tasks: part 334-500",
+      "Tasks: part 501-666"
+     ],
+     "title": "Executor 2"
+    },
+    {
+     "items": [
+      "Tasks: part 667-833",
+      "Tasks: part 834-1000"
+     ],
+     "title": "Executor 3"
+    }
+   ]
+  },
+  {
+   "caption": "Transformations are lazy; actions trigger execution.",
+   "col": "middle",
+   "heading": "Narrow vs wide transformations",
+   "left": {
+    "points": [
+     "Each partition runs independently",
+     "Examples: map, filter, prune",
+     "No network data movement",
+     "Stays in the same Spark stage"
+    ],
+    "title": "Narrow (no shuffle)"
+   },
+   "right": {
+    "points": [
+     "Moves data across executors",
+     "Examples: groupBy, join",
+     "Splits job into a new stage",
+     "Main cost; filter or broadcast early"
+    ],
+    "title": "Wide (shuffle)"
+   },
+   "type": "compare"
+  },
+  {
+   "col": "right",
+   "columns": [
+    "Structure",
+    "Where it shows up"
+   ],
+   "heading": "Data structures to recognize",
+   "rows": [
+    [
+     "Tree / B-tree",
+     "RDS/Aurora range & eq indexes"
+    ],
+    [
+     "Graph",
+     "Fraud rings, lineage (Neptune)"
+    ],
+    [
+     "DAG",
+     "Spark plans, Airflow, Step Fn"
+    ],
+    [
+     "Hash table",
+     "Kinesis/DynamoDB keys, joins"
+    ],
+    [
+     "Bloom filter",
+     "Skip checks in Parquet/ORC"
+    ]
+   ],
+   "type": "table"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Relationships, fraud rings",
+     "Amazon Neptune",
+     "Graph-native traversal queries"
+    ],
+    [
+     "OLTP range queries",
+     "RDS/Aurora B-tree",
+     "Tree index supports ranges"
+    ],
+    [
+     "One slow Spark task",
+     "Salt keys / broadcast",
+     "Fixes skewed hot partition"
+    ],
+    [
+     "500k tiny input files",
+     "Compact / Glue group",
+     "Cuts per-file overhead"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Distributed Computing, Data Structures & Spark Fundamentals"
+}

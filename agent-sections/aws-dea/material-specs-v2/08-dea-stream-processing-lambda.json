@@ -1,0 +1,196 @@
+{
+ "blocks": [
+  {
+   "col": "left",
+   "heading": "Core Concepts",
+   "items": [
+    {
+     "keyword": "Sync shard polling",
+     "name": "Event Source Map",
+     "tag": "AWS Lambda",
+     "text": "Lambda polls shards and invokes synchronously in order. Filter criteria drop unmatched events before invocation."
+    },
+    {
+     "keyword": "At-least-once",
+     "name": "Failure & Retries",
+     "tag": "Amazon Kinesis",
+     "text": "Failed batches retry until expiry and block the shard. Combine bisect, max retries/age, partial batch failures, and idempotent writes."
+    },
+    {
+     "keyword": "Dedicated 2 MB/s",
+     "name": "Fan-out & CDC",
+     "tag": "Amazon DynamoDB",
+     "text": "Enhanced fan-out gives each consumer 2 MB/s per shard. DynamoDB Streams keeps 24h item CDC; use KDS for longer retention."
+    }
+   ],
+   "type": "concepts"
+  },
+  {
+   "col": "left",
+   "items": [
+    "Lambda polls Kinesis via ESM; producer calling Lambda is a distractor.",
+    "Function SQS DLQ is for async only; use ESM on-failure dest for streams.",
+    "Concurrency = shards × ParallelizationFactor; low reserved concurrency throttles.",
+    "Order is per shard (per partition key if ParallelizationFactor > 1); timeout won't fix poison pills."
+   ],
+   "type": "tips"
+  },
+  {
+   "col": "middle",
+   "edges": [
+    {
+     "from": "start",
+     "to": "err"
+    },
+    {
+     "from": "err",
+     "label": "no",
+     "to": "ok"
+    },
+    {
+     "from": "err",
+     "label": "yes",
+     "to": "bisect"
+    },
+    {
+     "from": "bisect",
+     "label": "yes",
+     "to": "split"
+    },
+    {
+     "from": "bisect",
+     "label": "no",
+     "to": "whole"
+    },
+    {
+     "from": "split",
+     "to": "budget"
+    },
+    {
+     "from": "whole",
+     "to": "budget"
+    },
+    {
+     "from": "budget",
+     "label": "yes",
+     "to": "retry"
+    },
+    {
+     "from": "budget",
+     "label": "no",
+     "to": "dlq"
+    }
+   ],
+   "heading": "When a batch fails",
+   "nodes": [
+    {
+     "id": "start",
+     "kind": "start",
+     "label": "Batch invoked"
+    },
+    {
+     "id": "err",
+     "kind": "decision",
+     "label": "Function error?"
+    },
+    {
+     "id": "ok",
+     "kind": "end",
+     "label": "Checkpoint & next batch"
+    },
+    {
+     "id": "bisect",
+     "kind": "decision",
+     "label": "Bisect enabled?"
+    },
+    {
+     "id": "split",
+     "kind": "action",
+     "label": "Split batch in two"
+    },
+    {
+     "id": "whole",
+     "kind": "action",
+     "label": "Keep whole batch"
+    },
+    {
+     "id": "budget",
+     "kind": "decision",
+     "label": "Retries or age left?"
+    },
+    {
+     "id": "retry",
+     "kind": "action",
+     "label": "Retry batch"
+    },
+    {
+     "id": "dlq",
+     "kind": "end",
+     "label": "On-failure dest & continue"
+    }
+   ],
+   "type": "decision_tree"
+  },
+  {
+   "col": "right",
+   "heading": "ESM knobs",
+   "items": [
+    {
+     "label": "Max BatchSize (Kinesis)",
+     "value": "10,000"
+    },
+    {
+     "label": "Max batching window",
+     "value": "≤ 300 s"
+    },
+    {
+     "label": "ParallelizationFactor",
+     "value": "1–10 / shard"
+    },
+    {
+     "label": "Default retries (cap w/ age)",
+     "value": "∞ retries"
+    }
+   ],
+   "type": "callouts"
+  },
+  {
+   "col": "right",
+   "rows": [
+    [
+     "Bad record blocks shard; iterator age grows",
+     "Bisect + max retries + on-failure dest + partial batch",
+     "Isolates and skips poison pills"
+    ],
+    [
+     "Consumer lags; shards are fine",
+     "Raise ParallelizationFactor or BatchSize",
+     "More concurrent batches per shard"
+    ],
+    [
+     "Only process type = 'ORDER' events",
+     "ESM filter criteria",
+     "No invocation or cost for other events"
+    ],
+    [
+     "Many functions read stream, low latency",
+     "Enhanced fan-out consumers",
+     "Dedicated 2 MB/s per shard per consumer"
+    ],
+    [
+     "React to DynamoDB item changes",
+     "DynamoDB Streams + Lambda",
+     "Native item-level CDC"
+    ],
+    [
+     "5-min window agg with exactly-once",
+     "Managed Service for Apache Flink",
+     "Lambda tumbling windows lack exactly-once"
+    ]
+   ],
+   "type": "decisions"
+  }
+ ],
+ "replace_existing": true,
+ "title_line": "Lambda Stream Processing – ESM, Errors & Fan-out"
+}
