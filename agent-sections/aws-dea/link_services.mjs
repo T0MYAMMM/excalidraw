@@ -155,6 +155,27 @@ const link = (scene) => {
   }
   const href = (title) => `${BASE_URL}?element=${sectionBox.get(title).id}`;
 
+  // every material must be a group (its chips live in that group); stop
+  // before deleting anything if one was ungrouped for editing
+  const ungrouped = live
+    .filter(
+      (e) =>
+        e.type === "rectangle" &&
+        e.backgroundColor.toLowerCase() === "#fff4e6" &&
+        e.width > 1000 &&
+        !e.id.startsWith("legend-"),
+    )
+    .sort((a, b) => a.y - b.y)
+    .map((b, i) => (b.groupIds?.length ? null : i + 1))
+    .filter(Boolean);
+  if (ungrouped.length) {
+    throw new Error(
+      `material(s) ${ungrouped.join(
+        ", ",
+      )} are not grouped; regroup them first (nothing was changed)`,
+    );
+  }
+
   // drop chips from a previous run. Ids can change when the browser saves,
   // so chips are recognised by what they are: a "↗ …" box linking to a
   // service section, the "Services:" label, and their bound labels; plus any
