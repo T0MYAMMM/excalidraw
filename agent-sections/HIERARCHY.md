@@ -47,6 +47,12 @@ their own colours (e.g. the teal/mint cards in service sections).
   title line, and leave the content for Thomas to fill in.
 - Never overwrite or move the content inside a material Thomas has started
   filling; only move the whole group.
+- When a material is finished (no `- Template` heading left), link it to the
+  services it mentions: `node aws-dea/link_services.mjs`. An element naming one
+  service links straight to that section; a row of Violet-1 `↗ <service>` chips
+  under the material (in the material's group) links to every service it
+  mentions. Links use `http://localhost:3000/?element=<section box id>`. Rerun
+  it after finishing more materials (old chips are replaced).
 
 ## Service sections
 
