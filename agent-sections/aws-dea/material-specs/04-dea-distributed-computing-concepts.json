@@ -1,0 +1,193 @@
+{
+ "concepts": [
+  {
+   "keyword": "partition & scale out",
+   "name": "Scale-Out Compute",
+   "tag": "Amazon Redshift / Amazon EMR",
+   "text": "Splits jobs across nodes via horizontal scaling, partitioning, data locality, and fault tolerance (CAP trade-offs, MPP)."
+  },
+  {
+   "keyword": "in-memory engine",
+   "name": "Apache Spark",
+   "tag": "AWS Glue / Amazon EMR / Athena for Spark",
+   "text": "Driver plans jobs; executors run tasks on partitions. Lazy transformations trigger on actions; wide ops cause shuffles."
+  },
+  {
+   "keyword": "shuffles & skew",
+   "name": "Spark Bottlenecks",
+   "tag": "AWS Glue / Amazon EMR",
+   "text": "Minimize network shuffles (filter early, broadcast small tables), spread hot keys, and compact tiny files to 128 MB-1 GB."
+  },
+  {
+   "keyword": "trees, graphs, hashes",
+   "name": "Data Structures",
+   "tag": "Amazon Neptune / Amazon RDS",
+   "text": "B-trees power OLTP indexes; graphs model relationships and DAGs; hashes drive partitioning; Bloom filters skip data."
+  }
+ ],
+ "decisions": {
+  "rows": [
+   [
+    "relationships, traversals, fraud ring detection",
+    "Amazon Neptune (graph)",
+    "graph-native queries (Gremlin, openCypher, SPARQL)"
+   ],
+   [
+    "range queries on an indexed column in OLTP",
+    "RDS/Aurora B-tree index",
+    "tree index supports range lookups"
+   ],
+   [
+    "one Spark task runs much longer than others",
+    "Fix skew (salt keys, broadcast join)",
+    "one hot partition is far larger than the rest"
+   ],
+   [
+    "job is slow reading 500,000 tiny files",
+    "Compact files (128 MB-1 GB) or Glue grouping",
+    "per-file list/open overhead dominates"
+   ],
+   [
+    "join a large fact table with a small lookup table",
+    "Broadcast join",
+    "avoids shuffling the large table across network"
+   ],
+   [
+    "need more parallelism for a stream",
+    "Add shards or partitions",
+    "partitions are the unit of parallelism"
+   ]
+  ]
+ },
+ "diagram": {
+  "edges": [
+   {
+    "from": "drv",
+    "label": "assign tasks",
+    "to": "e1"
+   },
+   {
+    "from": "drv",
+    "label": "assign tasks",
+    "to": "e2"
+   },
+   {
+    "from": "e1",
+    "label": "shuffle on join key",
+    "to": "red"
+   },
+   {
+    "from": "e2",
+    "label": "shuffle on join key",
+    "to": "red"
+   },
+   {
+    "from": "red",
+    "label": "write",
+    "to": "out"
+   }
+  ],
+  "groups": [
+   {
+    "nodes": [
+     {
+      "id": "drv",
+      "label": "Driver (plans DAG from S3 Parquet)"
+     }
+    ],
+    "title": "Plan"
+   },
+   {
+    "nodes": [
+     {
+      "id": "e1",
+      "label": "Executor 1: partitions 1-500"
+     },
+     {
+      "id": "e2",
+      "label": "Executor 2: partitions 501-1000"
+     }
+    ],
+    "title": "Map Stage"
+   },
+   {
+    "nodes": [
+     {
+      "id": "red",
+      "label": "Reduce-side tasks"
+     }
+    ],
+    "title": "Reduce Stage"
+   },
+   {
+    "nodes": [
+     {
+      "id": "out",
+      "label": "S3: compacted output"
+     }
+    ],
+    "title": "Output"
+   }
+  ],
+  "heading": "Spark distributed execution and shuffle"
+ },
+ "steps": {
+  "heading": "Spark Execution Flow",
+  "items": [
+   {
+    "label": "Plan (Driver)",
+    "text": "Driver builds a DAG of lazy transformations and splits the job into stages at shuffle boundaries."
+   },
+   {
+    "label": "Execute Tasks",
+    "text": "Executors run one task per partition; narrow ops (map, filter) process locally without moving data."
+   },
+   {
+    "label": "Shuffle & Act",
+    "text": "Wide ops (join, groupBy) shuffle data across the network; actions (write, count) trigger execution."
+   }
+  ]
+ },
+ "table": {
+  "columns": [
+   "Structure",
+   "Purpose",
+   "AWS Examples"
+  ],
+  "heading": "Key Data Structures",
+  "rows": [
+   [
+    "B-tree / B+tree",
+    "Fast range and equality index lookups",
+    "RDS / Aurora default indexes"
+   ],
+   [
+    "Graph",
+    "Nodes and edges for deep relationships",
+    "Amazon Neptune (fraud, lineage)"
+   ],
+   [
+    "DAG",
+    "Acyclic task and execution dependencies",
+    "Spark plans, Airflow, Step Functions"
+   ],
+   [
+    "Hash table",
+    "Even key distribution and hash joins",
+    "Kinesis & DynamoDB partition keys"
+   ],
+   [
+    "LSM tree / Bloom filter",
+    "Write-optimized stores / skip-read checks",
+    "Keyspaces, HBase / Parquet, ORC"
+   ]
+  ]
+ },
+ "tips": [
+  "\"Scale up\" (bigger instance) rarely fixes a distributed bottleneck caused by data skew or many small files.",
+  "Neptune is the graph answer; avoid modeling deep relationship traversals in DynamoDB or RDS joins.",
+  "A DAG cannot contain cycles; orchestration retries come from retry policies, not cyclic edges.",
+  "Shuffles are the main cost in distributed SQL and Spark; Redshift distribution keys keep joined rows on the same slice."
+ ],
+ "title_line": "Distributed Computing, Data Structures & Spark"
+}

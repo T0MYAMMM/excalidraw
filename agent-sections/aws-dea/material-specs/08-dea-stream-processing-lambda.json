@@ -1,0 +1,183 @@
+{
+ "concepts": [
+  {
+   "keyword": "poll & invoke",
+   "name": "ESM Polling",
+   "tag": "AWS Lambda",
+   "text": "Lambda polls shards and invokes functions synchronously in order; producers never call Lambda."
+  },
+  {
+   "keyword": "unblock shards",
+   "name": "Error Handling",
+   "tag": "AWS Lambda",
+   "text": "Errors retry until expiry and block shards; use bisect, max retries/age, OnFailure dest and partial batch."
+  },
+  {
+   "keyword": "scale & filter",
+   "name": "Fan-out & Filter",
+   "tag": "Amazon Kinesis Data Streams + AWS Lambda",
+   "text": "Use enhanced fan-out for dedicated 2 MB/s per shard per consumer, or filter criteria to skip unmatched events."
+  },
+  {
+   "keyword": "at-least-once CDC",
+   "name": "DynamoDB Streams",
+   "tag": "Amazon DynamoDB Streams",
+   "text": "Captures item changes for 24 h (KEYS_ONLY, NEW/OLD images); retries are at-least-once, so write idempotently."
+  }
+ ],
+ "decisions": {
+  "rows": [
+   [
+    "one bad record blocks processing; iterator age grows",
+    "Bisect + max retries + on-failure dest + partial batch",
+    "isolates and skips poison pills without blocking"
+   ],
+   [
+    "consumer can't keep up, shards are fine",
+    "Raise ParallelizationFactor or BatchSize",
+    "more concurrent batches per shard (up to 10)"
+   ],
+   [
+    "only process events where type = 'ORDER'",
+    "ESM filter criteria",
+    "drops non-matching records before invocation"
+   ],
+   [
+    "many functions read the same stream, low latency",
+    "Enhanced fan-out consumers",
+    "dedicated 2 MB/s per shard per consumer"
+   ],
+   [
+    "react to DynamoDB item changes",
+    "DynamoDB Streams + Lambda",
+    "native 24h CDC (use Kinesis for longer retention)"
+   ],
+   [
+    "aggregate per 5-minute window with exactly-once",
+    "Managed Service for Apache Flink",
+    "Lambda tumbling windows (max 15m) lack exactly-once"
+   ]
+  ]
+ },
+ "diagram": {
+  "edges": [
+   {
+    "from": "kds",
+    "label": "poll / EFO",
+    "to": "esm"
+   },
+   {
+    "from": "ddb",
+    "label": "poll CDC",
+    "to": "esm"
+   },
+   {
+    "from": "esm",
+    "label": "sync batch",
+    "to": "fn"
+   },
+   {
+    "from": "esm",
+    "label": "failed metadata",
+    "to": "dlq"
+   }
+  ],
+  "groups": [
+   {
+    "nodes": [
+     {
+      "id": "kds",
+      "label": "Kinesis Data Streams (shards / EFO)"
+     },
+     {
+      "id": "ddb",
+      "label": "DynamoDB Streams (24h item CDC)"
+     }
+    ],
+    "title": "Stream Sources"
+   },
+   {
+    "nodes": [
+     {
+      "id": "esm",
+      "label": "ESM (poll, filter, batch, bisect)"
+     }
+    ],
+    "title": "Lambda ESM"
+   },
+   {
+    "nodes": [
+     {
+      "id": "fn",
+      "label": "Lambda Function (sync, idempotent)"
+     },
+     {
+      "id": "dlq",
+      "label": "OnFailure Dest (SQS/SNS/S3/Kafka)"
+     }
+    ],
+    "title": "Compute & Errors"
+   }
+  ],
+  "heading": "Lambda stream polling, errors & fan-out"
+ },
+ "steps": {
+  "heading": "Poison-Pill Recovery Flow",
+  "items": [
+   {
+    "label": "Isolate (Bisect)",
+    "text": "Enable BisectBatchOnFunctionError and ReportBatchItemFailures to split bad batches and skip good records."
+   },
+   {
+    "label": "Cap Retries / Age",
+    "text": "Set MaximumRetryAttempts or MaximumRecordAgeInSeconds so bad records stop blocking shards and IteratorAge."
+   },
+   {
+    "label": "Route Failures",
+    "text": "Send failed batch metadata to an ESM OnFailure destination (SQS, SNS, S3 or Kafka) for later inspection."
+   }
+  ]
+ },
+ "table": {
+  "columns": [
+   "Setting",
+   "Behavior / Limit",
+   "When to Tune"
+  ],
+  "heading": "Key ESM Settings & Knobs",
+  "rows": [
+   [
+    "BatchSize / Window",
+    "Up to 10,000 records; wait up to 300 s",
+    "Higher throughput or fuller batches on low volume"
+   ],
+   [
+    "ParallelizationFactor",
+    "1-10 batches/shard (ordered per key)",
+    "IteratorAge grows and function is the bottleneck"
+   ],
+   [
+    "BisectBatchOnError",
+    "Splits failing batch in half and retries",
+    "Isolate poison-pill records"
+   ],
+   [
+    "MaxRetries / MaxAge",
+    "Default retries until expiry; caps retries",
+    "Stop blocked shards; prefer freshness"
+   ],
+   [
+    "Filter / Partial Batch",
+    "Drop unmatched events; retry failed IDs",
+    "Cut invocation cost; avoid reprocessing good items"
+   ]
+  ]
+ },
+ "tips": [
+  "Producers never invoke Lambda for Kinesis—Lambda polls via the ESM. 'Call Lambda from producer' is a distractor.",
+  "Function-level SQS DLQs apply only to async invocations; for stream ESMs, configure the ESM OnFailure destination.",
+  "Kinesis ESM concurrency = shards × ParallelizationFactor; setting reserved concurrency too low causes throttling.",
+  "Ordering holds per shard (per partition key if ParallelizationFactor > 1); raising timeout won't fix a poison pill."
+ ],
+ "title_line": "Lambda Stream Processing: ESMs, Errors & Fan-out"
+}

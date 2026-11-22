@@ -1,0 +1,59 @@
+{
+  "title_line": "Modern Data Architecture: Lake, Warehouse, Lakehouse, Mesh",
+  "concepts": [
+    {"name": "Data Warehouse", "keyword": "schema-on-write", "text": "Structured, cleaned and modeled data for SQL analytics and BI; strong at complex joins and many concurrent users.", "tag": "Amazon Redshift"},
+    {"name": "Data Lake", "keyword": "schema-on-read", "text": "Data of any format and size in raw form; cheap, durable storage with decoupled compute and reprocessing from raw.", "tag": "Amazon S3"},
+    {"name": "Lakehouse", "keyword": "open table format", "text": "Lake storage plus warehouse features: ACID, updates/deletes, schema evolution, time travel.", "tag": "Apache Iceberg / Amazon S3 Tables"},
+    {"name": "Data Mesh", "keyword": "data products", "text": "Domain teams publish data products; a central team runs the platform and global governance.", "tag": "Amazon SageMaker Catalog + AWS Lake Formation"}
+  ],
+  "steps": {
+    "heading": "Data Lake Zones",
+    "items": [
+      {"label": "Raw / Bronze", "text": "Immutable copies of source data in the original format; keep them so you can replay."},
+      {"label": "Cleansed / Silver", "text": "Deduplicated, typed and validated; converted to Parquet / Iceberg."},
+      {"label": "Curated / Gold", "text": "Business-level aggregates, conformed dimensions and data products."}
+    ]
+  },
+  "diagram": {
+    "heading": "Data mesh with federated governance",
+    "groups": [
+      {"title": "Producers", "nodes": [{"id": "sales", "label": "Sales domain account: S3 + Glue Catalog"}, {"id": "fin", "label": "Finance domain account: Redshift"}]},
+      {"title": "Governance", "nodes": [{"id": "cat", "label": "SageMaker Catalog (business catalog)"}, {"id": "lf", "label": "Lake Formation permissions"}]},
+      {"title": "Consumers", "nodes": [{"id": "ana", "label": "Analytics: Athena/Redshift/QuickSight"}]}
+    ],
+    "edges": [
+      {"from": "sales", "to": "cat", "label": "publish"},
+      {"from": "fin", "to": "cat", "label": "publish"},
+      {"from": "ana", "to": "cat", "label": "search & subscribe"},
+      {"from": "cat", "to": "lf", "label": "approved grant"},
+      {"from": "lf", "to": "ana", "label": "cross-account share"},
+      {"from": "fin", "to": "ana", "label": "datashare"}
+    ]
+  },
+  "table": {
+    "heading": "Data Sharing Patterns",
+    "columns": ["Pattern", "Mechanism", "Copy?"],
+    "rows": [
+      ["Centralized lake", "One account holds all data; Lake Formation grants to consumers", "No"],
+      ["Hub-and-spoke / mesh", "Producers own data; central catalog; LF grants via AWS RAM", "No"],
+      ["Warehouse to warehouse", "Redshift data sharing (same/cross-account, cross-Region)", "No (live, read-only)"],
+      ["External / third-party", "AWS Data Exchange (files, APIs, Redshift datashares, S3 access)", "Depends"],
+      ["Bulk export", "UNLOAD / CTAS to S3, replication", "Yes"]
+    ]
+  },
+  "decisions": {
+    "rows": [
+      ["store all raw data cheaply, any format, reprocess later", "S3 data lake + Glue Data Catalog", "schema-on-read, durable and low cost"],
+      ["complex SQL, BI dashboards, consistent performance at high concurrency", "Amazon Redshift", "MPP columnar warehouse"],
+      ["updates/deletes and time travel on lake data", "Apache Iceberg tables or S3 Tables", "ACID lakehouse table format"],
+      ["domains own their data, central discovery and approval", "SageMaker Catalog + Lake Formation cross-account", "data mesh with federated governance"],
+      ["share live Redshift data with another account, no copies", "Redshift data sharing", "zero-copy, consistent reads"]
+    ]
+  },
+  "tips": [
+    "\"No copies / no data movement\" points to data sharing, Spectrum, federated query or Lake Formation grants, not exports.",
+    "Upserts or GDPR deletes on S3 data need Iceberg (or Hudi/Delta), not rewriting partitions by hand.",
+    "Lake Formation stores no data: it governs access to S3 data and catalog resources.",
+    "Don't put raw, unstructured or rarely queried data in the warehouse: costly and inflexible."
+  ]
+}

@@ -1,0 +1,210 @@
+{
+ "concepts": [
+  {
+   "keyword": "near real time",
+   "name": "Managed Delivery",
+   "tag": "Amazon Data Firehose",
+   "text": "No shards to provision; auto-scales and buffers by size or time before delivering to S3, Redshift, OpenSearch, Iceberg, Splunk or HTTP."
+  },
+  {
+   "keyword": "per-record",
+   "name": "Lambda Transform",
+   "tag": "AWS Lambda",
+   "text": "Invokes Lambda on record batches to enrich, filter, mask or reformat (e.g. CSV to JSON); returns Ok, Dropped or ProcessingFailed."
+  },
+  {
+   "keyword": "JSON to Parquet/ORC",
+   "name": "Format Conversion",
+   "tag": "AWS Glue Data Catalog",
+   "text": "Converts JSON input to Parquet or ORC in flight using a Glue Data Catalog table schema; non-JSON must be converted by Lambda first."
+  },
+  {
+   "keyword": "Hive-style prefixes",
+   "name": "Dynamic Partitions",
+   "tag": "Amazon S3",
+   "text": "Builds S3 prefixes from record fields via inline JQ or Lambda, creating query-friendly partitions without a separate ETL job."
+  }
+ ],
+ "decisions": {
+  "rows": [
+   [
+    "deliver streaming data to S3 with least operational overhead",
+    "Amazon Data Firehose",
+    "serverless managed delivery, no consumer code"
+   ],
+   [
+    "convert JSON records to Parquet before storing in S3",
+    "Firehose format conversion + Glue table",
+    "built-in columnar conversion, no ETL job"
+   ],
+   [
+    "partition S3 output by a field inside the payload",
+    "Firehose dynamic partitioning",
+    "builds Hive-style prefixes from record content"
+   ],
+   [
+    "sub-second processing, multiple consumers, or replay",
+    "Amazon Kinesis Data Streams",
+    "Firehose buffers and has no replay"
+   ],
+   [
+    "mask or reformat fields before delivery",
+    "Firehose + Lambda transformation",
+    "stateless per-record transformation in flight"
+   ],
+   [
+    "windowed aggregations on a stream",
+    "Managed Service for Apache Flink",
+    "stateful stream processing"
+   ]
+  ]
+ },
+ "diagram": {
+  "edges": [
+   {
+    "from": "put",
+    "label": "push records",
+    "to": "fh"
+   },
+   {
+    "from": "stream",
+    "label": "read stream",
+    "to": "fh"
+   },
+   {
+    "from": "fh",
+    "label": "transform",
+    "to": "lam"
+   },
+   {
+    "from": "glue",
+    "label": "Parquet schema",
+    "to": "fh"
+   },
+   {
+    "from": "fh",
+    "label": "deliver / backup",
+    "to": "s3"
+   },
+   {
+    "from": "fh",
+    "label": "stage & COPY",
+    "to": "rs"
+   },
+   {
+    "from": "fh",
+    "label": "index / send",
+    "to": "os"
+   }
+  ],
+  "groups": [
+   {
+    "nodes": [
+     {
+      "id": "put",
+      "label": "Direct PUT / CW Logs / IoT"
+     },
+     {
+      "id": "stream",
+      "label": "Kinesis Data Streams / MSK"
+     }
+    ],
+    "title": "Sources"
+   },
+   {
+    "nodes": [
+     {
+      "id": "fh",
+      "label": "Amazon Data Firehose (buffer/partition)"
+     },
+     {
+      "id": "lam",
+      "label": "Lambda transform (optional)"
+     },
+     {
+      "id": "glue",
+      "label": "Glue Data Catalog (schema)"
+     }
+    ],
+    "title": "Firehose Pipeline"
+   },
+   {
+    "nodes": [
+     {
+      "id": "s3",
+      "label": "S3 (Parquet, Iceberg, error/raw backup)"
+     },
+     {
+      "id": "rs",
+      "label": "Redshift (S3 stage + COPY)"
+     },
+     {
+      "id": "os",
+      "label": "OpenSearch / Splunk / HTTP"
+     }
+    ],
+    "title": "Destinations"
+   }
+  ],
+  "heading": "Managed streaming delivery architecture"
+ },
+ "steps": {
+  "heading": "Streaming Delivery Flow",
+  "items": [
+   {
+    "label": "Ingest & Buffer",
+    "text": "Receive from Direct PUT, Kinesis Data Streams or MSK; buffer records until size or time hint is reached."
+   },
+   {
+    "label": "Transform/Convert",
+    "text": "Optionally run Lambda transforms, convert JSON to Parquet/ORC via Glue schema, and extract partition keys."
+   },
+   {
+    "label": "Deliver & Backup",
+    "text": "Deliver batches (Redshift stages via S3 + COPY); route failed records or raw copies to S3 backup prefixes."
+   }
+  ]
+ },
+ "table": {
+  "columns": [
+   "Capability",
+   "How It Works",
+   "Key Exam Detail"
+  ],
+  "heading": "Firehose Capabilities",
+  "rows": [
+   [
+    "Buffering",
+    "Batches by size or time hint before delivery",
+    "Near real time; larger buffers avoid small S3 files"
+   ],
+   [
+    "Format conversion",
+    "Converts JSON to Parquet or ORC in flight",
+    "Needs Glue Data Catalog schema; CSV needs Lambda first"
+   ],
+   [
+    "Dynamic partitioning",
+    "Extracts S3 prefix keys via inline JQ or Lambda",
+    "Produces Hive-style S3 partitions without ETL jobs"
+   ],
+   [
+    "Error & raw backup",
+    "Writes failed records or raw copies to S3 prefix",
+    "Redshift retries COPY, then writes failed manifest to S3"
+   ],
+   [
+    "Replay & consumers",
+    "Single delivery pipe; no log retention",
+    "Pair with Kinesis Data Streams for replay or multi-consumer"
+   ]
+  ]
+ },
+ "tips": [
+  "Firehose is near real time (seconds to minutes) due to buffering; 'milliseconds' points to Kinesis Data Streams.",
+  "Format conversion requires JSON input and a Glue Data Catalog table schema; convert CSV to JSON with Lambda first.",
+  "No replay and no multiple consumers: put Kinesis Data Streams in front of Firehose when you need either.",
+  "Small buffers create many small S3 files that hurt Athena; Redshift delivery always stages through S3 and runs COPY."
+ ],
+ "title_line": "Amazon Data Firehose: Managed Near-Real-Time Delivery"
+}

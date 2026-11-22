@@ -1,0 +1,192 @@
+{
+ "concepts": [
+  {
+   "keyword": "unit of scale",
+   "name": "Shard",
+   "tag": "Amazon Kinesis Data Streams",
+   "text": "1 MB/s (1,000 rec/s) write, 2 MB/s shared read; MD5 partition key routes records and keeps order per shard."
+  },
+  {
+   "keyword": "auto vs provisioned",
+   "name": "Capacity Modes",
+   "tag": "Amazon Kinesis Data Streams",
+   "text": "On-demand scales auto (pay/GB) for spiky load; provisioned bills shard-hours for steady traffic."
+  },
+  {
+   "keyword": "dedicated read pipe",
+   "name": "Enhanced Fan-Out",
+   "tag": "Amazon Kinesis Data Streams",
+   "text": "Dedicated 2 MB/s per shard per consumer pushed over HTTP/2 (~70 ms) instead of shared 2 MB/s pull."
+  },
+  {
+   "keyword": "24 h to 365 days",
+   "name": "Retention & Replay",
+   "tag": "Amazon Kinesis Data Streams",
+   "text": "24 h default (up to 365 days); consumers replay from TRIM_HORIZON, AT_TIMESTAMP, or a sequence number."
+  }
+ ],
+ "decisions": {
+  "rows": [
+   [
+    "custom real-time processing, multiple consumers, replay",
+    "Kinesis Data Streams",
+    "durable, ordered, replayable stream"
+   ],
+   [
+    "several consumers need full throughput and low latency",
+    "Enhanced fan-out (EFO)",
+    "dedicated 2 MB/s per shard per consumer"
+   ],
+   [
+    "unpredictable traffic, no capacity planning wanted",
+    "On-demand mode",
+    "scales automatically; pay per GB"
+   ],
+   [
+    "steady, well-known throughput at lowest cost",
+    "Provisioned mode",
+    "pay per shard-hour; reshard as needed"
+   ],
+   [
+    "writes throttled while other shards are idle",
+    "Better partition key",
+    "fixes hot shard from low-cardinality key"
+   ],
+   [
+    "only deliver to S3/Redshift/OpenSearch, no custom code",
+    "Amazon Data Firehose",
+    "managed delivery, no consumer code"
+   ]
+  ]
+ },
+ "diagram": {
+  "edges": [
+   {
+    "from": "sdk",
+    "label": "PutRecords / KPL",
+    "to": "shard"
+   },
+   {
+    "from": "aws",
+    "label": "stream events",
+    "to": "shard"
+   },
+   {
+    "from": "shard",
+    "label": "EFO push (~70 ms)",
+    "to": "lambda"
+   },
+   {
+    "from": "shard",
+    "label": "GetRecords / EFO",
+    "to": "kcl"
+   },
+   {
+    "from": "shard",
+    "label": "archive to S3",
+    "to": "fh"
+   }
+  ],
+  "groups": [
+   {
+    "nodes": [
+     {
+      "id": "sdk",
+      "label": "SDK / KPL / Kinesis Agent"
+     },
+     {
+      "id": "aws",
+      "label": "DynamoDB / CW Logs / IoT"
+     }
+    ],
+    "title": "Producers"
+   },
+   {
+    "nodes": [
+     {
+      "id": "shard",
+      "label": "Shards (MD5 key, 24h-365d retention)"
+     }
+    ],
+    "title": "Data Stream"
+   },
+   {
+    "nodes": [
+     {
+      "id": "lambda",
+      "label": "Lambda / Flink (EFO: 2 MB/s each)"
+     },
+     {
+      "id": "kcl",
+      "label": "KCL app (DynamoDB lease table)"
+     },
+     {
+      "id": "fh",
+      "label": "Amazon Data Firehose -> S3"
+     }
+    ],
+    "title": "Consumers"
+   }
+  ],
+  "heading": "Kinesis Data Streams fan-in and fan-out"
+ },
+ "steps": {
+  "heading": "Record Lifecycle in KDS",
+  "items": [
+   {
+    "label": "Produce",
+    "text": "PutRecords (<=500), KPL (batch/aggregate/retry), or Agent write <=1 MB records with a partition key."
+   },
+   {
+    "label": "Shard & Retain",
+    "text": "MD5 hash of the partition key picks a shard; Kinesis assigns a sequence number and retains 24 h-365 days."
+   },
+   {
+    "label": "Consume & Replay",
+    "text": "Shared pull or EFO HTTP/2 push feeds consumers; replay via TRIM_HORIZON, LATEST, sequence, or AT_TIMESTAMP."
+   }
+  ]
+ },
+ "table": {
+  "columns": [
+   "Aspect",
+   "Spec / Limit",
+   "Exam Note"
+  ],
+  "heading": "Key Quotas, Modes & Limits",
+  "rows": [
+   [
+    "Shard write limit",
+    "1 MB/s or 1,000 rec/s",
+    "Over limit -> ProvisionedThroughputExceededException"
+   ],
+   [
+    "Shared read",
+    "2 MB/s & 5 GetRecords/s",
+    "Shared by all consumers; ~200 ms+ latency"
+   ],
+   [
+    "Enhanced fan-out",
+    "2 MB/s/shard/consumer",
+    "HTTP/2 push (SubscribeToShard); ~70 ms latency"
+   ],
+   [
+    "Record & batch",
+    "1 MB/rec; 500/PutRecords",
+    "KPL aggregates small records (+ slight latency)"
+   ],
+   [
+    "Retention",
+    "24 h default; max 365 d",
+    "Enables replay; archive to S3 via Firehose"
+   ]
+  ]
+ },
+ "tips": [
+  "KDS does not write directly to S3: use a consumer such as Firehose, Lambda, or a KCL app.",
+  "Ordering is guaranteed only within a shard (same partition key), never globally across the stream.",
+  "Rising IteratorAgeMilliseconds means consumers lag: scale consumers (shards, Lambda parallelization, EFO).",
+  "KCL keeps shard leases and checkpoints in DynamoDB; throttling on that table can stall consumers."
+ ],
+ "title_line": "Amazon Kinesis Data Streams: Shards, Fan-Out, Replay"
+}

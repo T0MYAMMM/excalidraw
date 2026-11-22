@@ -1,0 +1,206 @@
+{
+ "concepts": [
+  {
+   "keyword": "managed Kafka",
+   "name": "Amazon MSK",
+   "tag": "Amazon MSK",
+   "text": "Managed Apache Kafka in your VPC; Provisioned for full config control (with tiered storage & Express brokers) or Serverless for automatic scaling."
+  },
+  {
+   "keyword": "managed connectors",
+   "name": "MSK Connect",
+   "tag": "Amazon MSK Connect",
+   "text": "Runs managed Kafka Connect source and sink connectors (e.g., Debezium CDC from databases or S3 sinks) with no Connect cluster to manage."
+  },
+  {
+   "keyword": "windows & exactly-once",
+   "name": "Managed Flink",
+   "tag": "Amazon Managed Service for Apache Flink",
+   "text": "Managed Apache Flink (Java, Scala, Python, SQL) for keyed state, windows, stream joins, event-time watermarks, and checkpointed fault tolerance."
+  },
+  {
+   "keyword": "topics & partitions",
+   "name": "Kafka Core Model",
+   "tag": "Amazon MSK",
+   "text": "Topics split into ordered partitions (parallelism unit); record keys enforce per-partition ordering, and consumer groups track offsets."
+  }
+ ],
+ "decisions": {
+  "rows": [
+   [
+    "existing Kafka producers/consumers, minimal code changes",
+    "Amazon MSK",
+    "native Kafka APIs"
+   ],
+   [
+    "Kafka APIs with no cluster sizing or broker management",
+    "MSK Serverless",
+    "automatic capacity scaling"
+   ],
+   [
+    "stream database changes (CDC) into Kafka",
+    "MSK Connect + Debezium",
+    "managed Kafka Connect workers"
+   ],
+   [
+    "windowed aggregation, stream joins, exactly-once, event time",
+    "Managed Service for Apache Flink",
+    "managed stateful stream processing"
+   ],
+   [
+    "deliver MSK topic data to S3 with no code",
+    "Firehose with MSK as source",
+    "managed no-code delivery"
+   ],
+   [
+    "very long retention of stream data cheaply",
+    "MSK tiered storage (or archive to S3)",
+    "low-cost storage tier"
+   ]
+  ]
+ },
+ "diagram": {
+  "edges": [
+   {
+    "from": "db",
+    "label": "Debezium CDC",
+    "to": "msk"
+   },
+   {
+    "from": "app",
+    "label": "produce",
+    "to": "msk"
+   },
+   {
+    "from": "msk",
+    "label": "consume",
+    "to": "flink"
+   },
+   {
+    "from": "msk",
+    "label": "read topic",
+    "to": "fh"
+   },
+   {
+    "from": "flink",
+    "label": "write metrics",
+    "to": "os"
+   },
+   {
+    "from": "fh",
+    "label": "deliver",
+    "to": "s3"
+   }
+  ],
+  "groups": [
+   {
+    "nodes": [
+     {
+      "id": "db",
+      "label": "Aurora/RDS via MSK Connect"
+     },
+     {
+      "id": "app",
+      "label": "Microservices"
+     }
+    ],
+    "title": "Producers"
+   },
+   {
+    "nodes": [
+     {
+      "id": "msk",
+      "label": "Amazon MSK Topic"
+     }
+    ],
+    "title": "Stream"
+   },
+   {
+    "nodes": [
+     {
+      "id": "flink",
+      "label": "Managed Flink (5-min windows, dedup)"
+     },
+     {
+      "id": "fh",
+      "label": "Firehose / S3 Sink Connector"
+     }
+    ],
+    "title": "Process & Deliver"
+   },
+   {
+    "nodes": [
+     {
+      "id": "os",
+      "label": "OpenSearch Dashboards"
+     },
+     {
+      "id": "s3",
+      "label": "S3 Data Lake"
+     }
+    ],
+    "title": "Targets"
+   }
+  ],
+  "heading": "MSK ingestion, Flink analytics & S3 landing"
+ },
+ "steps": {
+  "heading": "Kafka to Analytics Stream Flow",
+  "items": [
+   {
+    "label": "Ingest to MSK",
+    "text": "Producers or MSK Connect (Debezium CDC) write keyed records into Kafka topic partitions."
+   },
+   {
+    "label": "Stateful Process",
+    "text": "Managed Service for Apache Flink computes windows, dedup, or joins using checkpoints and watermarks."
+   },
+   {
+    "label": "Deliver & Serve",
+    "text": "Write results to OpenSearch dashboards, or land MSK topics to S3 (Firehose / sink) and Redshift MVs."
+   }
+  ]
+ },
+ "table": {
+  "columns": [
+   "Kafka Term",
+   "Meaning",
+   "Kinesis Equivalent"
+  ],
+  "heading": "Kafka vs. Kinesis Mapping",
+  "rows": [
+   [
+    "Topic / Partition",
+    "Named stream / ordered log (parallelism unit)",
+    "Stream / Shard"
+   ],
+   [
+    "Key",
+    "Determines partition for per-key ordering",
+    "Partition key"
+   ],
+   [
+    "Consumer group",
+    "Consumers sharing a topic's partitions",
+    "KCL application"
+   ],
+   [
+    "Offset",
+    "Consumer's read position in a partition",
+    "Sequence number / checkpoint"
+   ],
+   [
+    "Retention",
+    "Time/size-based; very long with tiered storage",
+    "24 h – 365 days"
+   ]
+  ]
+ },
+ "tips": [
+  "Choose MSK only when Kafka compatibility is required; otherwise Kinesis Data Streams has less operational overhead.",
+  "Flink is not a delivery service and Firehose is not a stateful processor; watch for distractors that swap them.",
+  "\"Kinesis Data Analytics\" is the former name for Amazon Managed Service for Apache Flink.",
+  "MSK runs inside your VPC: consumers (Lambda, Glue, EMR) need VPC network access and proper security group rules."
+ ],
+ "title_line": "Amazon MSK & Managed Service for Apache Flink"
+}

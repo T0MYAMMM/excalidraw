@@ -42,6 +42,15 @@ their own colours (e.g. the teal/mint cards in service sections).
 
 ## Materials
 
+- Filling a material from its lesson: an agy agent writes a spec
+  (`materials/agy_material_specs.py`, schema `materials/spec.schema.json`, every
+  field length-limited so the result stays concise), then
+  `materials/render_set.mjs` draws it in the standard layout: left = title,
+  Core Concepts cards, Exam Tips; middle = 3-step flow and the architecture
+  flowchart (dashed groups, node order chosen for fewest crossings, arrow
+  labels as separate texts); right = facts table and Comparisons & Decision
+  Guide as grid tables. It only replaces template content, never notes
+  Thomas has written. Specs live in `aws-dea/material-specs/`.
 - New materials start as a copy of Thomas's template: the orange box with
   `- Template` headings. Copy it unchanged (new ids, new group id), add the
   title line, and leave the content for Thomas to fill in.
