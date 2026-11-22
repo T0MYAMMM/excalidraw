@@ -95,6 +95,9 @@ def reset_drawing(name: str) -> None:
 
 def build_prompt(set_dir: Path, service: dict) -> str:
     template = (set_dir / "prompt-template.md").read_text()
+    rules = (Path(__file__).resolve().parent / "HIERARCHY.md").read_text()
+    template = f"{rules}\n\n---\n\n{template}"
+
     reference = (set_dir / "kinesis-reference.json").read_text()
     return (template.replace("__REFERENCE__", reference).replace("__TITLE__", service["title"])
             .replace("__FOCUS__", service["focus"]).replace("__SLUG__", service["slug"])

@@ -1,0 +1,389 @@
+{
+ "source": "/home/t0myam/learning/cert-academy/aws/content/certs/data-engineer-associate/cert.yaml",
+ "phases": [
+  {
+   "id": "p1",
+   "title": "Orientation & Foundations",
+   "modules": [
+    {
+     "id": "exam-orientation",
+     "title": "The DEA-C01 Exam and Data Fundamentals",
+     "lessons": [
+      {
+       "id": "dea-exam-overview",
+       "title": "The DEA-C01 Exam – Format, Domains and Study Strategy"
+      },
+      {
+       "id": "dea-data-characteristics",
+       "title": "Volume, Velocity, Variety – Describing Data and Workloads"
+      }
+     ]
+    },
+    {
+     "id": "data-platform-foundations",
+     "title": "Data Platform Foundations",
+     "lessons": [
+      {
+       "id": "dea-modern-data-architecture",
+       "title": "Modern Data Architectures on AWS – Lake, Warehouse, Lakehouse, Mesh"
+      },
+      {
+       "id": "dea-distributed-computing-concepts",
+       "title": "Distributed Computing, Data Structures and Spark Fundamentals"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "Data Ingestion & Transformation",
+   "modules": [
+    {
+     "id": "streaming-ingestion",
+     "title": "Streaming Ingestion",
+     "lessons": [
+      {
+       "id": "dea-kinesis-data-streams",
+       "title": "Amazon Kinesis Data Streams – Shards, Capacity, Consumers and Replay"
+      },
+      {
+       "id": "dea-amazon-data-firehose",
+       "title": "Amazon Data Firehose – Managed Delivery, Transformation and Format Conversion"
+      },
+      {
+       "id": "dea-msk-and-flink",
+       "title": "Amazon MSK and Managed Service for Apache Flink – Kafka and Stateful Streams"
+      },
+      {
+       "id": "dea-stream-processing-lambda",
+       "title": "Processing Streams with Lambda – Event Source Mappings, Errors and Fan-out"
+      }
+     ]
+    },
+    {
+     "id": "batch-ingestion",
+     "title": "Batch, Database and API Ingestion",
+     "lessons": [
+      {
+       "id": "dea-batch-ingestion-services",
+       "title": "Batch Ingestion – S3, AppFlow, DataSync, Transfer Family, Snow and Data Exchange"
+      },
+      {
+       "id": "dea-dms-migration-cdc",
+       "title": "AWS DMS – Full Load, Change Data Capture and Schema Conversion"
+      },
+      {
+       "id": "dea-data-apis-rate-limits",
+       "title": "Data APIs, Throttling, Rate Limits and IP Allowlists"
+      },
+      {
+       "id": "dea-schedulers-event-triggers",
+       "title": "Schedulers and Event Triggers – EventBridge, S3 Notifications and Glue Triggers"
+      }
+     ]
+    },
+    {
+     "id": "data-transformation",
+     "title": "Transforming and Processing Data",
+     "lessons": [
+      {
+       "id": "dea-glue-etl-fundamentals",
+       "title": "AWS Glue ETL Fundamentals – Jobs, DynamicFrames, Connections and Bookmarks"
+      },
+      {
+       "id": "dea-glue-performance-cost",
+       "title": "Tuning AWS Glue Jobs for Performance and Cost"
+      },
+      {
+       "id": "dea-emr-processing",
+       "title": "Amazon EMR – Clusters, Serverless, EKS and Big Data Frameworks"
+      },
+      {
+       "id": "dea-choosing-transformation-compute",
+       "title": "Choosing Transformation Compute – Glue, EMR, Lambda, Redshift, Containers, Batch"
+      },
+      {
+       "id": "dea-file-formats-conversion",
+       "title": "Data Formats, Compression and Format Conversion (CSV to Parquet)"
+      },
+      {
+       "id": "dea-llm-data-processing",
+       "title": "Integrating LLMs into Data Pipelines with Amazon Bedrock"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "p3",
+   "title": "Orchestration, Automation & Operations",
+   "modules": [
+    {
+     "id": "pipeline-orchestration",
+     "title": "Pipeline Orchestration",
+     "lessons": [
+      {
+       "id": "dea-step-functions",
+       "title": "AWS Step Functions – Serverless Orchestration for Data Pipelines"
+      },
+      {
+       "id": "dea-mwaa-airflow",
+       "title": "Amazon MWAA – Managed Apache Airflow for Data Pipelines"
+      },
+      {
+       "id": "dea-orchestration-choices",
+       "title": "Choosing an Orchestrator – Glue Workflows, EventBridge, Step Functions or MWAA"
+      },
+      {
+       "id": "dea-resilient-pipelines-alerts",
+       "title": "Resilient, Fault-Tolerant Pipelines with Alerts (SNS, SQS, DLQs)"
+      }
+     ]
+    },
+    {
+     "id": "programming-devops",
+     "title": "Programming and DevOps for Data Pipelines",
+     "lessons": [
+      {
+       "id": "dea-lambda-data-engineering",
+       "title": "AWS Lambda for Data Engineering – Concurrency, Storage and Automation"
+      },
+      {
+       "id": "dea-iac-sam-cdk",
+       "title": "Infrastructure as Code for Data Pipelines – CloudFormation, CDK and SAM"
+      },
+      {
+       "id": "dea-cicd-engineering-practices",
+       "title": "CI/CD, Version Control, Testing and Code Optimization for Data Pipelines"
+      }
+     ]
+    },
+    {
+     "id": "monitoring-quality",
+     "title": "Monitoring, Troubleshooting and Data Quality",
+     "lessons": [
+      {
+       "id": "dea-cloudwatch-monitoring",
+       "title": "Monitoring Data Pipelines with Amazon CloudWatch"
+      },
+      {
+       "id": "dea-pipeline-troubleshooting",
+       "title": "Troubleshooting Glue, EMR, MWAA, Step Functions and Athena Pipelines"
+      },
+      {
+       "id": "dea-log-analysis",
+       "title": "Analyzing Logs – Athena, CloudWatch Logs Insights, OpenSearch and EMR"
+      },
+      {
+       "id": "dea-data-quality-rules",
+       "title": "Ensuring Data Quality – Glue Data Quality, DQDL and DataBrew Rules"
+      },
+      {
+       "id": "dea-sampling-and-skew",
+       "title": "Data Sampling Techniques and Handling Data Skew"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "p4",
+   "title": "Data Store Management & Analytics",
+   "modules": [
+    {
+     "id": "storage-selection",
+     "title": "Choosing and Designing Data Stores",
+     "lessons": [
+      {
+       "id": "dea-choosing-data-store",
+       "title": "Choosing the Right Data Store – Access Patterns, Cost and Performance"
+      },
+      {
+       "id": "dea-s3-data-lake-design",
+       "title": "Designing an S3 Data Lake – Zones, Prefixes, Partitioning and File Sizing"
+      },
+      {
+       "id": "dea-dynamodb-design",
+       "title": "DynamoDB for Data Engineers – Keys, Indexes, Capacity and Integrations"
+      }
+     ]
+    },
+    {
+     "id": "redshift-warehouse",
+     "title": "Amazon Redshift Data Warehousing",
+     "lessons": [
+      {
+       "id": "dea-redshift-architecture-design",
+       "title": "Amazon Redshift Architecture and Table Design – Distribution, Sort Keys, Compression"
+      },
+      {
+       "id": "dea-redshift-load-unload",
+       "title": "Loading and Unloading Redshift – COPY, Auto-Copy, Streaming Ingestion, Zero-ETL, UNLOAD"
+      },
+      {
+       "id": "dea-redshift-spectrum-federated-mv",
+       "title": "Redshift Spectrum, Federated Queries, Materialized Views and Data Sharing"
+      },
+      {
+       "id": "dea-redshift-concurrency-locks",
+       "title": "Locks, Concurrency and Workload Management in Redshift and RDS"
+      }
+     ]
+    },
+    {
+     "id": "catalog-table-formats",
+     "title": "Catalogs and Open Table Formats",
+     "lessons": [
+      {
+       "id": "dea-glue-data-catalog-crawlers",
+       "title": "AWS Glue Data Catalog, Crawlers and Partition Synchronization"
+      },
+      {
+       "id": "dea-open-table-formats-iceberg",
+       "title": "Open Table Formats – Apache Iceberg and Amazon S3 Tables"
+      },
+      {
+       "id": "dea-business-catalog-lineage",
+       "title": "Business Data Catalogs and Data Lineage with Amazon SageMaker Catalog"
+      }
+     ]
+    },
+    {
+     "id": "lifecycle-modeling",
+     "title": "Lifecycle, Modeling and Vectors",
+     "lessons": [
+      {
+       "id": "dea-s3-lifecycle-versioning",
+       "title": "S3 Storage Classes, Lifecycle Policies and Versioning"
+      },
+      {
+       "id": "dea-data-retention-resiliency",
+       "title": "Data Retention, Deletion and Resiliency (TTL, Object Lock, Replication, Backups)"
+      },
+      {
+       "id": "dea-schema-design-evolution",
+       "title": "Data Modeling, Schema Design and Schema Evolution"
+      },
+      {
+       "id": "dea-vector-stores-embeddings",
+       "title": "Vectorization, Vector Indexes (HNSW vs IVF) and Vector Stores on AWS"
+      }
+     ]
+    },
+    {
+     "id": "query-and-analysis",
+     "title": "Querying and Analyzing Data",
+     "lessons": [
+      {
+       "id": "dea-athena-deep-dive",
+       "title": "Amazon Athena Deep Dive – Querying, Cost Control and Performance"
+      },
+      {
+       "id": "dea-sql-analytics-patterns",
+       "title": "SQL Analytics Patterns – Aggregation, Rolling Averages, Pivoting and Views"
+      },
+      {
+       "id": "dea-data-prep-visualization",
+       "title": "Data Preparation and Visualization – DataBrew, SageMaker Unified Studio, Notebooks and Amazon Quick"
+      },
+      {
+       "id": "dea-provisioned-vs-serverless",
+       "title": "Provisioned vs Serverless and Managed vs Unmanaged Services"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "p5",
+   "title": "Data Security & Governance",
+   "modules": [
+    {
+     "id": "identity-network",
+     "title": "Authentication, Identity and Network Access",
+     "lessons": [
+      {
+       "id": "dea-iam-for-data-pipelines",
+       "title": "IAM for Data Pipelines – Roles, Policies and Least Privilege"
+      },
+      {
+       "id": "dea-network-security-data",
+       "title": "Network Security for Data – Security Groups, Endpoints, Access Points and Allowlists"
+      },
+      {
+       "id": "dea-secrets-credentials",
+       "title": "Managing Credentials – Secrets Manager vs Parameter Store"
+      }
+     ]
+    },
+    {
+     "id": "authorization-governance",
+     "title": "Authorization and Data Governance",
+     "lessons": [
+      {
+       "id": "dea-lake-formation-permissions",
+       "title": "AWS Lake Formation – Fine-Grained Permissions, LF-Tags and Cross-Account Sharing"
+      },
+      {
+       "id": "dea-redshift-database-security",
+       "title": "Amazon Redshift Database Security – RBAC, RLS, Dynamic Masking and Auditing"
+      },
+      {
+       "id": "dea-sagemaker-unified-studio-governance",
+       "title": "SageMaker Unified Studio Governance – Domains, Domain Units, Projects and Catalog Access"
+      }
+     ]
+    },
+    {
+     "id": "encryption-privacy",
+     "title": "Encryption, Masking and PII",
+     "lessons": [
+      {
+       "id": "dea-encryption-kms",
+       "title": "Encryption with AWS KMS – At Rest, In Transit and Across Accounts"
+      },
+      {
+       "id": "dea-masking-pii-macie",
+       "title": "Masking, Anonymization and PII Discovery with Macie, Glue and Redshift"
+      }
+     ]
+    },
+    {
+     "id": "audit-compliance",
+     "title": "Audit Logging and Compliance",
+     "lessons": [
+      {
+       "id": "dea-audit-logging-cloudtrail",
+       "title": "Audit Logging – CloudTrail, CloudTrail Lake and CloudWatch Logs"
+      },
+      {
+       "id": "dea-sovereignty-config-sharing",
+       "title": "Data Sovereignty, AWS Config and Governed Data Sharing"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "p6",
+   "title": "Exam Readiness",
+   "modules": [
+    {
+     "id": "exam-readiness",
+     "title": "Exam Readiness",
+     "lessons": [
+      {
+       "id": "dea-cross-domain-scenarios",
+       "title": "Cross-Domain Scenarios – Designing End-to-End Pipelines"
+      },
+      {
+       "id": "dea-exam-traps-strategy",
+       "title": "Common Exam Traps, Keyword Cues and Exam-Day Strategy"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
