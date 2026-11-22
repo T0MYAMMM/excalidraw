@@ -51,10 +51,6 @@ const restructure = (scene) => {
   if (live().some((e) => e.id === "legend-title")) {
     throw new Error("already restructured");
   }
-  const labelOf = (e) =>
-    (e.boundElements ?? [])
-      .map((b) => byId.get(b.id))
-      .find((t) => t?.type === "text")?.text ?? "";
   const boxes = (fill, pred) =>
     live()
       .filter(
@@ -106,8 +102,9 @@ const restructure = (scene) => {
   curriculum.phases.forEach((p, pi) => {
     const modCentres = [];
     for (const m of p.modules) {
-      const ys = m.lessons.map(() => rowMid(li++));
-      const c = (ys[0] + ys[ys.length - 1]) / 2;
+      const first = li;
+      li += m.lessons.length;
+      const c = (rowMid(first) + rowMid(li - 1)) / 2;
       centreY[tree.green[mi++].id] = c;
       modCentres.push(c);
     }

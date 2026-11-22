@@ -17,6 +17,8 @@ model): Opus passed 3/3 (54 s, ~5.8k output tokens per section), Neon 3/3
 (84 s, ~14.9k), Argon 0/3 (it wrote a literal `\n`, so text ran outside the box).
 `agy_sections.py` applies the rule by itself.
 
+See [HIERARCHY.md](HIERARCHY.md) for the colour hierarchy and layout rules every agent follows. It is prepended to every agent prompt.
+
 ## Workflow
 
 ```bash
