@@ -180,11 +180,16 @@ const link = (scene) => {
   // so chips are recognised by what they are: a "↗ …" box linking to a
   // service section, the "Services:" label, and their bound labels; plus any
   // "↗ …" text whose box is gone (left over from older runs).
+  // a chip box: violet, links to a section, and either carries a "↗" label
+  // or is chip-sized (its label may be lost: the browser renames boxes on save)
   const isChipBox = (e) =>
     e.type === "rectangle" &&
     e.backgroundColor.toLowerCase() === "#f3f0ff" &&
     (e.link ?? "").includes("?element=") &&
-    (e.boundElements ?? []).some((b) => byId.get(b.id)?.text?.startsWith("↗"));
+    ((e.boundElements ?? []).some((b) =>
+      byId.get(b.id)?.text?.startsWith("↗"),
+    ) ||
+      (Math.round(e.width) === CHIP.w && Math.round(e.height) === CHIP.h));
   const doomed = new Set();
   for (const e of live) {
     if (
@@ -205,6 +210,13 @@ const link = (scene) => {
   for (const e of live) {
     if (e.containerId && doomed.has(e.containerId)) {
       doomed.add(e.id); // a chip's own label
+    }
+    if (doomed.has(e.id) && e.type === "rectangle") {
+      for (const b of e.boundElements ?? []) {
+        if (byId.get(b.id)?.type === "text") {
+          doomed.add(b.id); // its label, even if containerId is stale
+        }
+      }
     }
   }
   for (const id of doomed) {

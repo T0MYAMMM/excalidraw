@@ -53,6 +53,17 @@ their own colours (e.g. the teal/mint cards in service sections).
   `materials/render_blocks.mjs` stacks the blocks in three columns and scales
   the text (0.78-1.3x) so the material fills its box. Specs:
   `aws-dea/material-specs-v2/`.
+- What a good material looks like (from Thomas's edits to materials 1-4):
+  - Every column fills the box from top to bottom. Leftover height goes into
+    even gaps between blocks, not one empty band at the bottom. A sparse
+    column makes its text bigger before it adds gaps (up to 1.4x).
+  - Columns use the full width: left 46-540, middle 560-1030, right
+    1048-1597. Nothing ends early with a dead strip beside it.
+  - Exam tips are big (14-16 px), since they are what gets re-read.
+  - Nothing below about 9.5 px; body text is about 10-12 px.
+  - Tables are as wide as their content (not stretched to the column), and
+    every row uses the header row's column widths
+    (`materials/equalize_tables.mjs <drawing> <rows>`).
 - Older single-layout pipeline (kept for reference): an agy agent writes a spec
   (`materials/agy_material_specs.py`, schema `materials/spec.schema.json`, every
   field length-limited so the result stays concise), then

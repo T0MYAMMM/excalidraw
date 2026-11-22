@@ -19,13 +19,15 @@ const W = 0.49; // Nunito width per font-size unit (wrapping)
 const WX = 0.62; // Excalifont width per font-size unit (wrapping)
 const PAD = 5;
 const COLS = {
-  left: [46, 560],
-  middle: [591, 1005],
-  right: [1028, 1597],
-  "middle-right": [591, 1597],
+  left: [46, 540],
+  middle: [560, 1030],
+  right: [1048, 1597],
+  "middle-right": [560, 1597],
 };
+const MAX_GAP = 90; // most extra space added between two blocks of a column
 const TOP = { left: 77, middle: 79, right: 79 };
 const BOTTOM = 582;
+const MAX_COL_SCALE = 1.4; // a sparse column may grow its text up to this
 const newId = () => randomBytes(10).toString("base64url");
 
 const wrap = (text, width, fs, perChar = W) => {
@@ -51,7 +53,15 @@ const wrap = (text, width, fs, perChar = W) => {
  * Lays out one material. Builders return element inputs (absolute coords)
  * plus post-processing hooks; nothing touches the scene until commit().
  */
-const layout = (box, spec, s) => {
+const layout = (box, spec, sc, tipsFs) => {
+  // sc: one scale for all columns, or { left, middle, right }
+  const scaleOf = (col) =>
+    typeof sc === "number"
+      ? sc
+      : col === "middle-right"
+      ? Math.min(sc.middle, sc.right)
+      : sc[col] ?? sc.left;
+  let s = scaleOf("left");
   const X = (dx) => box.x + dx;
   const Y = (dy) => box.y + dy;
   const blocks = []; // { inputs, fix: [(fresh) => void], family }
@@ -83,7 +93,6 @@ const layout = (box, spec, s) => {
     strokeWidth: 1,
     roughness: 0,
   });
-  const headingH = 20 * s + 8;
   const heading = (x, y, t, inputs, color) => {
     inputs.push(
       T(
@@ -96,10 +105,11 @@ const layout = (box, spec, s) => {
           : { _font: EXCALIFONT },
       ),
     );
-    return headingH;
+    return 20 * s + 8;
   };
   const cursor = { ...TOP };
-  const commitBlock = (inputs) => blocks.push({ inputs, cells: [] });
+  const commitBlock = (inputs) =>
+    blocks.push({ inputs, cells: [], col: "title", y: 0, h: 0 });
 
   // red title in the left column
   {
@@ -178,14 +188,14 @@ const layout = (box, spec, s) => {
           ),
           fontSize: vfs,
         });
-        const lines = wrap(it.label, cw - 10, 8.5 * s);
+        const lines = wrap(it.label, cw - 10, 9.5 * s);
         lines.forEach((l, k) =>
           inputs.push(
             T(
-              cx + cw / 2 - (l.length * 8.5 * s * W) / 2,
-              y + h + 34 * s + k * 10.6 * s,
+              cx + cw / 2 - (l.length * 9.5 * s * W) / 2,
+              y + h + 34 * s + k * 11.9 * s,
               l,
-              8.5,
+              9.5,
             ),
           ),
         );
@@ -242,7 +252,7 @@ const layout = (box, spec, s) => {
       // lanes of bars (e.g. window types)
       lanes.forEach((lane, i) => {
         const ly = y + h + i * laneH;
-        inputs.push(T(x, ly + 4, lane.name, 8.5));
+        inputs.push(T(x, ly + 4, lane.name, 9.5));
         lane.bars.forEach(([a, c], k) => {
           inputs.push(
             rect(ax + a * aw, ly + 3, Math.max(4, (c - a) * aw), laneH - 8, {
@@ -284,29 +294,29 @@ const layout = (box, spec, s) => {
           strokeWidth: 1,
           roughness: 0,
         });
-        const lw = mk.label.length * 8 * s * W;
+        const lw = mk.label.length * 9.5 * s * W;
         const above = i % 2 === 0;
         inputs.push(
           T(
             Math.min(Math.max(mx - lw / 2, x), x + w - lw),
             above ? axisY - 20 * s : axisY + 8,
             mk.label,
-            8,
+            9.5,
             { strokeColor: "#1971c2" },
           ),
         );
       });
       inputs.push(
-        T(ax, axisY + (b.marks?.length ? 22 * s : 6), b.axis_start, 8, {
+        T(ax, axisY + (b.marks?.length ? 22 * s : 6), b.axis_start, 9.5, {
           strokeColor: "#868e96",
         }),
       );
       inputs.push(
         T(
-          ax + aw - b.axis_end.length * 8 * s * W,
+          ax + aw - b.axis_end.length * 9.5 * s * W,
           axisY + (b.marks?.length ? 22 * s : 6),
           b.axis_end,
-          8,
+          9.5,
           { strokeColor: "#868e96" },
         ),
       );
@@ -326,7 +336,7 @@ const layout = (box, spec, s) => {
       const n = b.stages.length;
       const gap = 24;
       const sw = (w - (n - 1) * gap) / n;
-      const fs = 8.5 * s;
+      const fs = 9.5 * s;
       const labels = b.stages.map((st) => wrap(st.label, sw - 10, fs));
       const sh = Math.max(
         34,
@@ -345,7 +355,7 @@ const layout = (box, spec, s) => {
         );
         if (st.note) {
           inputs.push(
-            T(sx, y + h + sh + 4, wrap(st.note, sw, 7.5 * s).join("\n"), 7.5, {
+            T(sx, y + h + sh + 4, wrap(st.note, sw, 9 * s).join("\n"), 9, {
               strokeColor: "#495057",
             }),
           );
@@ -355,7 +365,7 @@ const layout = (box, spec, s) => {
       const notesH = Math.max(
         0,
         ...b.stages.map((st) =>
-          st.note ? wrap(st.note, sw, 7.5 * s).length * 7.5 * s * 1.25 + 6 : 0,
+          st.note ? wrap(st.note, sw, 9 * s).length * 9 * s * 1.25 + 6 : 0,
         ),
       );
       h += sh + notesH + 6;
@@ -380,7 +390,7 @@ const layout = (box, spec, s) => {
           strokeColor: "#e03131",
         });
         inputs.push(
-          T(bx + sw / 2 + 6, y + h + 4, b.branch.label, 7.5, {
+          T(bx + sw / 2 + 6, y + h + 4, b.branch.label, 9, {
             strokeColor: "#e03131",
           }),
         );
@@ -409,7 +419,8 @@ const layout = (box, spec, s) => {
         }
       }
       const depth = Math.max(...level.values()) + 1;
-      const rowH = 64 * s;
+      const bs = s; // block scale, fixed for the loop below
+      const rowH = 64 * bs;
       const ids = new Map();
       const pos = new Map();
       for (let lv = 0; lv < depth; lv++) {
@@ -417,10 +428,10 @@ const layout = (box, spec, s) => {
         row.forEach((nd, i) => {
           const isDec = nd.kind === "decision";
           const nw = isDec ? 132 : 128;
-          const lines = wrap(nd.label, nw - (isDec ? 34 : 12), 7.5 * s);
+          const lines = wrap(nd.label, nw - (isDec ? 34 : 12), 9 * bs);
           const nh = isDec
-            ? Math.max(44, lines.length * 9.4 * s + 22)
-            : Math.max(28, lines.length * 9.4 * s + 10);
+            ? Math.max(44, lines.length * 9.4 * bs + 22)
+            : Math.max(28, lines.length * 9.4 * bs + 10);
           const cx = x + ((i + 0.5) * w) / row.length;
           const ny = y + h + lv * rowH;
           const id = newId();
@@ -443,7 +454,7 @@ const layout = (box, spec, s) => {
             backgroundColor: fill,
             strokeWidth: 1,
             roughness: 0,
-            label: { text: lines.join("\n"), fontSize: 7.5 * s },
+            label: { text: lines.join("\n"), fontSize: 9 * bs },
           });
         });
       }
@@ -459,7 +470,7 @@ const layout = (box, spec, s) => {
           const a = pos.get(e.from);
           const c = pos.get(e.to);
           edgeLabels.push(
-            T((a.cx + c.cx) / 2 + 4, (a.ny + a.nh + c.ny) / 2 - 6, e.label, 7, {
+            T((a.cx + c.cx) / 2 + 4, (a.ny + a.nh + c.ny) / 2 - 6, e.label, 9, {
               strokeColor: "#495057",
             }),
           );
@@ -473,7 +484,7 @@ const layout = (box, spec, s) => {
       const inputs = [];
       let h = heading(x, y, b.heading, inputs);
       const cw = (w - 30) / 2;
-      const fs = 8.5 * s;
+      const fs = 9.5 * s;
       inputs.push(T(x, y + h, b.left_title, 9, { strokeColor: "#1971c2" }));
       inputs.push(
         T(x + cw + 30, y + h, b.right_title, 9, { strokeColor: "#1971c2" }),
@@ -509,25 +520,25 @@ const layout = (box, spec, s) => {
         rect(x + w / 2 - tw / 2, y + h, tw, 32 * s, {
           id: topId,
           backgroundColor: "#e7f5ff",
-          label: { text: b.top, fontSize: 8.5 * s },
+          label: { text: b.top, fontSize: 9.5 * s },
         }),
       );
       const n = b.workers.length;
       const ww = (w - (n - 1) * 12) / n;
       const wy = y + h + 32 * s + 34;
       const bodyLines = b.workers.map((wk) =>
-        wk.items.flatMap((it) => wrap(`• ${it}`, ww - 12, 8 * s)),
+        wk.items.flatMap((it) => wrap(`• ${it}`, ww - 12, 9.5 * s)),
       );
       const wh =
         22 * s +
-        Math.max(...bodyLines.map((l) => l.length)) * 8 * s * 1.25 +
+        Math.max(...bodyLines.map((l) => l.length)) * 9.5 * s * 1.25 +
         10;
       b.workers.forEach((wk, i) => {
         const wx = x + i * (ww + 12);
         const id = newId();
         inputs.push(rect(wx, wy, ww, wh, { id, backgroundColor: "#e6fcf5" }));
         inputs.push(T(wx + 6, wy + 5, wk.title, 9, { _font: EXCALIFONT }));
-        inputs.push(T(wx + 6, wy + 22 * s, bodyLines[i].join("\n"), 8));
+        inputs.push(T(wx + 6, wy + 22 * s, bodyLines[i].join("\n"), 9.5));
         inputs.push(arrow(topId, id));
       });
       h = wy - y + wh + 6;
@@ -560,17 +571,17 @@ const layout = (box, spec, s) => {
         );
         inputs.push(
           T(
-            fx + fw / 2 - (grp.title.length * 8 * s * W) / 2,
+            fx + fw / 2 - (grp.title.length * 9.5 * s * W) / 2,
             y + h + 4,
             grp.title,
-            8,
+            9.5,
             { strokeColor: "#495057" },
           ),
         );
         grp.nodes.forEach((nd, ni) => {
           const id = newId();
           nodeId.set(nd.id, id);
-          const lines = wrap(nd.label, fw - 18, 7.5 * s);
+          const lines = wrap(nd.label, fw - 18, 9 * s);
           const nh = Math.max(28, lines.length * 9.4 * s + 8);
           const ny =
             y + h + 18 + ((ni + 0.5) * (fh - 22)) / grp.nodes.length - nh / 2;
@@ -579,7 +590,7 @@ const layout = (box, spec, s) => {
             rect(fx + 8, ny, fw - 16, nh, {
               id,
               backgroundColor: "#e6fcf5",
-              label: { text: lines.join("\n"), fontSize: 7.5 * s },
+              label: { text: lines.join("\n"), fontSize: 9 * s },
             }),
           );
         });
@@ -588,14 +599,14 @@ const layout = (box, spec, s) => {
         inputs.push(arrow(nodeId.get(e.from), nodeId.get(e.to)));
         const a = centers.get(e.from);
         const c = centers.get(e.to);
-        const lw = e.label.length * 6.5 * s * W;
+        const lw = e.label.length * 8.5 * s * W;
         const horizontal = Math.abs(c.cx - a.cx) >= Math.abs(c.cy - a.cy);
         const mx = (a.cx + c.cx) / 2;
         const my = (a.cy + c.cy) / 2;
         inputs.push(
           horizontal
-            ? T(mx - lw / 2, my - 12, e.label, 6.5)
-            : T(mx + 4, my - 4, e.label, 6.5),
+            ? T(mx - lw / 2, my - 12, e.label, 8.5)
+            : T(mx + 4, my - 4, e.label, 8.5),
         );
       }
       return { inputs, h: h + fh + 8 };
@@ -608,10 +619,14 @@ const layout = (box, spec, s) => {
       const longest = rows[0].map((_, c) =>
         Math.max(...rows.map((r) => (r[c] ?? "").length)),
       );
-      const total = longest.reduce((a, c) => a + c, 0);
-      const raw = longest.map((l) => Math.max(0.14, Math.min(0.6, l / total)));
-      const sum = raw.reduce((a, c) => a + c, 0);
-      const widths = raw.map((r) => (r / sum) * w);
+      // natural width per column (long cells wrap at half the column width);
+      // shrink proportionally only if the table would be wider than the column
+      const natural = longest.map((l) =>
+        Math.min(l * fs * W + PAD * 2 + 6, w * 0.5),
+      );
+      const naturalSum = natural.reduce((a, c) => a + c, 0);
+      const widths =
+        naturalSum > w ? natural.map((n) => (n / naturalSum) * w) : natural;
       const fix = [];
       rows.forEach((r, ri) => {
         const wrapped = r.map((cell, c) => wrap(cell, widths[c] - PAD * 2, fs));
@@ -654,24 +669,35 @@ const layout = (box, spec, s) => {
     tips(b, x, y, w) {
       const inputs = [];
       const h = heading(x, y, b.heading ?? "Exam Tips & Traps", inputs);
+      // tips are large: their size is chosen to fill the left column
       const lines = b.items.flatMap((t, i) =>
-        wrap(`${i + 1}. ${t}`, w - 20, 9.5 * s).map((l, k) =>
+        wrap(`${i + 1}. ${t}`, w - 20, tipsFs).map((l, k) =>
           k ? `    ${l}` : l,
         ),
       );
-      inputs.push(T(x + 18, y + h, lines.join("\n"), 9.5));
-      return { inputs, h: h + lines.length * 9.5 * s * 1.25 + 8 };
+      inputs.push({
+        ...T(x + 18, y + h, lines.join("\n"), 1),
+        fontSize: tipsFs,
+      });
+      return { inputs, h: h + lines.length * tipsFs * 1.25 + 8 };
     },
   };
 
   for (const b of spec.blocks) {
+    s = scaleOf(b.col);
     const [x1, x2] = COLS[b.col];
     const y =
       b.col === "middle-right"
         ? Math.max(cursor.middle, cursor.right)
         : cursor[b.col];
     const built = B[b.type](b, x1, y, x2 - x1);
-    blocks.push({ inputs: built.inputs, cells: built.cells ?? [] });
+    blocks.push({
+      inputs: built.inputs,
+      cells: built.cells ?? [],
+      col: b.col,
+      y,
+      h: built.h,
+    });
     const next = y + built.h + 6;
     if (b.col === "middle-right") {
       cursor.middle = next;
@@ -680,7 +706,44 @@ const layout = (box, spec, s) => {
       cursor[b.col] = next;
     }
   }
-  return { blocks, bottom: Math.max(cursor.left, cursor.middle, cursor.right) };
+  return {
+    blocks,
+    bottom: Math.max(cursor.left, cursor.middle, cursor.right),
+    leftBottom: cursor.left,
+    cols: { ...cursor },
+  };
+};
+
+/** Shares each column's leftover height as equal gaps between its blocks. */
+const spreadColumns = (plan) => {
+  const shift = new Map(plan.blocks.map((b) => [b, null]));
+  for (const col of ["left", "middle", "right"]) {
+    const inCol = plan.blocks
+      .filter(
+        (b) => b.col === col || (b.col === "middle-right" && col !== "left"),
+      )
+      .sort((a, b) => a.y - b.y);
+    if (inCol.length < 2) {
+      continue;
+    }
+    const last = inCol.at(-1);
+    const leftover = BOTTOM - (last.y + last.h);
+    const gap = Math.max(0, Math.min(MAX_GAP, leftover / (inCol.length - 1)));
+    inCol.forEach((b, i) => {
+      const dy = i * gap;
+      shift.set(b, shift.get(b) === null ? dy : Math.min(shift.get(b), dy));
+    });
+  }
+  for (const [b, dy] of shift) {
+    if (!dy) {
+      continue;
+    }
+    for (const input of b.inputs) {
+      if (typeof input.y === "number") {
+        input.y += dy;
+      }
+    }
+  }
 };
 
 export const renderBlocks = (scene, row, spec) => {
@@ -712,10 +775,19 @@ export const renderBlocks = (scene, row, spec) => {
       )
       .map((e) => e.id),
   );
+  // a chip's label, matched both ways: the browser renames boxes on save
+  // without updating their labels' containerId
+  const chipLabels = new Set(
+    members
+      .filter((e) => chipBoxes.has(e.id))
+      .flatMap((e) => (e.boundElements ?? []).map((b) => b.id)),
+  );
   const isChip = (e) =>
     chipBoxes.has(e.id) ||
     (e.type === "text" &&
-      (chipBoxes.has(e.containerId) || e.text === "Services:"));
+      (chipBoxes.has(e.containerId) ||
+        chipLabels.has(e.id) ||
+        e.text === "Services:"));
   if (
     !spec.replace_existing &&
     !members.some((e) => e.type === "text" && e.text.trim() === "- Template")
@@ -728,10 +800,37 @@ export const renderBlocks = (scene, row, spec) => {
   let s = 1;
   let plan;
   for (s = 1.3; s >= 0.78; s -= 0.04) {
-    plan = layout(box, spec, s);
+    plan = layout(box, spec, s, 12 * s);
     if (plan.bottom <= BOTTOM) {
       break;
     }
+  }
+  // tips as large as the left column allows (12-16 px)
+  let tipsFs = 12 * s;
+  for (let t = 16; t > 12 * s; t -= 0.5) {
+    const trial = layout(box, spec, s, t);
+    if (trial.bottom <= BOTTOM && trial.leftBottom <= BOTTOM) {
+      plan = trial;
+      tipsFs = t;
+      break;
+    }
+  }
+  // sparse middle/right columns grow their text before gaps fill the rest
+  const sc = { left: s, middle: s, right: s };
+  if (plan.bottom <= BOTTOM) {
+    for (const col of ["middle", "right"]) {
+      for (let g = MAX_COL_SCALE; g > sc[col] + 0.001; g -= 0.02) {
+        const trial = layout(box, spec, { ...sc, [col]: g }, tipsFs);
+        if (trial.bottom <= BOTTOM) {
+          sc[col] = g;
+          plan = trial;
+          break;
+        }
+      }
+    }
+  }
+  if (plan.bottom <= BOTTOM) {
+    spreadColumns(plan);
   }
   if (plan.bottom > BOTTOM) {
     throw new Error(
@@ -798,7 +897,10 @@ export const renderBlocks = (scene, row, spec) => {
   }
   return {
     row,
-    scale: Math.round(s * 100) / 100,
+    scale: Object.fromEntries(
+      Object.entries(sc).map(([k, v]) => [k, Math.round(v * 100) / 100]),
+    ),
+    tips_font: tipsFs,
     removed,
     added,
     bottom: Math.round(plan.bottom),
