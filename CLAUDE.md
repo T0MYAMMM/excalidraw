@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+> **This branch (`file-manager`) adds a local stack on top of upstream:** drawings stored as files (`file-server/`), an MCP server (`mcp-server/`), background removal (rembg), and agent tooling (`agent-sections/`). Read [LOCAL-STACK.md](LOCAL-STACK.md) before working on any of these. The rest of this file is upstream's.
+
 ## Project Structure
 
 Excalidraw is a **monorepo** with a clear separation between the core library and the application:

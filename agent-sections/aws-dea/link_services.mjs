@@ -1,8 +1,9 @@
 /* eslint-disable no-console -- CLI script that reports to stdout */
 // Links finished materials to the AWS service sections they mention.
 // - An element that names exactly one service links straight to it.
-// - Under each finished material, a row of Violet-1 chips (one per service
-//   mentioned, in reading order) links to each service section.
+// - Right of each finished material, a vertical list of Violet-1 chips (one
+//   per service mentioned, in reading order; a second column past 16) links
+//   to each service section.
 // A material is "finished" when it has no "- Template" heading left.
 // Safe to rerun: previous chips are replaced, links are recomputed.
 // Usage: node link_services.mjs [--dry-run]
@@ -234,6 +235,9 @@ const link = (scene) => {
     )
     .sort((a, b) => a.y - b.y);
   const report = [];
+  // fresh ids every run: reusing a just-deleted id makes the browser give the
+  // box a new random id on load without updating its label's containerId
+  const run = Date.now().toString(36);
   mats.forEach((box, row) => {
     const g = box.groupIds.at(-1);
     const els = members(g).filter(
@@ -265,7 +269,7 @@ const link = (scene) => {
     const inputs = [
       {
         type: "text",
-        id: `svc-chip-${row + 1}-label`,
+        id: `svc-chip-${run}-${row + 1}-label`,
         x: x0,
         y: box.y,
         text: "Services:",
@@ -280,7 +284,7 @@ const link = (scene) => {
       const pos = k % perColumn;
       inputs.push({
         type: "rectangle",
-        id: `svc-chip-${row + 1}-${k + 1}`,
+        id: `svc-chip-${run}-${row + 1}-${k + 1}`,
         x: x0 + col * (CHIP.w + CHIP.gap * 2),
         y: box.y + CHIP.top + pos * (CHIP.h + CHIP.gap),
         width: CHIP.w,
